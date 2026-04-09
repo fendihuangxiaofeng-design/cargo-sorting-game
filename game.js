@@ -103,14 +103,14 @@ function initShelves() {
     const spacing = 20;
     const shelfWidth = CONFIG.shelfWidth;
     const shelfHeight = CONFIG.shelfHeight;
-    const shelfGap = 70;
+    const shelfGap = 50; // 缩小货架间距
     
     gameState.shelves = [];
     
     // 第1层（最上方）：中间炸弹货架（0分）
     gameState.shelves.push({
         x: canvas.width / 2 - shelfWidth / 2,
-        y: 50,
+        y: 40,
         width: shelfWidth,
         height: shelfHeight,
         type: 'bomb',
@@ -119,7 +119,7 @@ function initShelves() {
     });
     
     // 第2层：左蓝、右绿（3分）
-    const layer2Y = 180;
+    const layer2Y = 140;
     gameState.shelves.push({
         x: spacing,
         y: layer2Y,
@@ -190,7 +190,7 @@ function spawnItem() {
     const type = CONFIG.itemTypes[Math.floor(Math.random() * CONFIG.itemTypes.length)];
     const item = {
         x: -CONFIG.itemSize,
-        y: canvas.height - 150,
+        y: canvas.height - 120, // 货物位置上移
         width: CONFIG.itemSize,
         height: CONFIG.itemSize,
         type: type.name,
@@ -351,20 +351,20 @@ function drawShelves() {
 
 // 绘制传送带
 function drawConveyor() {
-    const y = canvas.height - 120;
+    const y = canvas.height - 90; // 传送带位置上移
     const conveyorImage = ImageManager.getImage(CONFIG.images.conveyor);
     
     if (conveyorImage) {
-        ctx.drawImage(conveyorImage, 0, y - 60, canvas.width, 120);
+        ctx.drawImage(conveyorImage, 0, y - 45, canvas.width, 90); // 缩小传送带高度
     } else {
         ctx.fillStyle = CONFIG.colors.conveyor;
-        ctx.fillRect(0, y - 60, canvas.width, 120);
+        ctx.fillRect(0, y - 45, canvas.width, 90); // 缩小传送带高度
         
         ctx.fillStyle = '#333';
         const rollerCount = Math.floor(canvas.width / 50);
         for (let i = 0; i < rollerCount; i++) {
             ctx.beginPath();
-            ctx.arc(i * 50 + 25, y, 15, 0, Math.PI * 2);
+            ctx.arc(i * 50 + 25, y, 12, 0, Math.PI * 2); // 缩小滚轴
             ctx.fill();
         }
     }
