@@ -3,7 +3,7 @@
     'use strict';
 
     const CONFIG = {
-        INITIAL_GOLD: 300,
+        INITIAL_GOLD: 6000,
         ENTRY_FEE: 50,
         WIN_REWARD: 150,
         SELL_RATE: 0.7,
@@ -413,15 +413,31 @@
         },
 
         selectPart(item) {
+            const isInBuilder = GameState.currentScreen === 'builder' && GameState.currentHorse;
+            
             if (item.fromInventory) {
-                const invIndex = GameState.player.inventory.findIndex(i =>
-                    i.type === item.type && i.name === item.name && i.quality === item.quality
-                );
-                if (invIndex > -1) {
-                    this.equipPartFromInventory(GameState.partSelectorType, invIndex);
+                if (isInBuilder) {
+                    const invIndex = GameState.player.inventory.findIndex(i =>
+                        i.type === item.type && i.name === item.name && i.quality === item.quality
+                    );
+                    if (invIndex > -1) {
+                        this.equipPartFromInventory(GameState.partSelectorType, invIndex);
+                    }
+                } else {
+                    Game.showNotification(`「${item.name}」已放入背包`, 'success');
                 }
             } else {
+                const originalItem = SHOP_ITEMS[item.originalIndex];
                 Shop.purchaseDirect(item.originalIndex);
+                if (isInBuilder) {
+                    const lastItem = GameState.player.inventory[GameState.player.inventory.length - 1];
+                    if (lastItem && lastItem.type === originalItem.type && lastItem.name === originalItem.name) {
+                        const invIndex = GameState.player.inventory.length - 1;
+                        this.equipPartFromInventory(GameState.partSelectorType, invIndex);
+                    }
+                } else {
+                    Game.showNotification(`「${originalItem.name}」已放入背包`, 'success');
+                }
             }
             this.closePartSelector();
         },
