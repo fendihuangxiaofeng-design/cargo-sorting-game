@@ -11,19 +11,20 @@
     <div id="game-container">
         <!-- 主界面 -->
         <div id="main-screen" class="screen landscape">
-            <div class="screen-bg pixel-bg">
-                <div class="pixel-dots"></div>
+            <div class="screen-bg" data-sprite="bg_main"></div>
+            
+            <div class="corner-dots-container">
                 <div class="corner-dots top-left"></div>
                 <div class="corner-dots top-right"></div>
                 <div class="corner-dots bottom-left"></div>
                 <div class="corner-dots bottom-right"></div>
             </div>
             
-            <div class="status-bar">
+            <div class="status-bar" data-sprite="status_bar">
                 <span class="time">10:42</span>
                 <div class="status-icons">
-                    <span class="icon">📶</span>
-                    <span class="icon">📡</span>
+                    <span class="icon signal">📶</span>
+                    <span class="icon wifi">📡</span>
                     <span class="icon battery">🔋</span>
                     <span class="battery-text">100%</span>
                 </div>
@@ -31,62 +32,44 @@
             
             <div class="main-content">
                 <div class="game-title-container">
-                    <h1 class="game-title">
-                        <span class="title-char yellow">田</span>
-                        <span class="title-char white">忌</span>
-                        <span class="title-char green">赛</span>
-                        <span class="title-char yellow">马</span>
-                    </h1>
-                </div>
-                
-                <div class="start-button" onclick="Game.switchScreen('barn')">
-                    <div class="button-inner">
-                        <div class="horse-pixel">
-                            <div class="hp-body"></div>
-                            <div class="hp-head"></div>
-                            <div class="hp-neck"></div>
-                            <div class="hp-tail"></div>
-                            <div class="hp-leg-front-left"></div>
-                            <div class="hp-leg-front-right"></div>
-                            <div class="hp-leg-back-left"></div>
-                            <div class="hp-leg-back-right"></div>
-                            <div class="hp-saddle"></div>
-                            <div class="hp-mane"></div>
-                        </div>
-                        <div class="grass-container">
-                            <div class="grass-row">
-                                <span class="grass"></span><span class="grass"></span><span class="grass"></span><span class="grass"></span><span class="grass"></span>
-                            </div>
-                            <div class="grass-row offset">
-                                <span class="grass"></span><span class="grass"></span><span class="grass"></span><span class="grass"></span><span class="grass"></span>
-                            </div>
-                        </div>
-                        <span class="start-text">开始游戏</span>
-                        <span class="corner-decoration left">●</span>
-                        <span class="corner-decoration right">●</span>
+                    <div class="game-title">
+                        <img class="title-char" data-sprite="title_tian" src="assets/images/ui/title_tian.png" alt="田">
+                        <img class="title-char" data-sprite="title_ji" src="assets/images/ui/title_ji.png" alt="忌">
+                        <img class="title-char" data-sprite="title_sai" src="assets/images/ui/title_sai.png" alt="赛">
+                        <img class="title-char" data-sprite="title_ma" src="assets/images/ui/title_ma.png" alt="马">
                     </div>
                 </div>
                 
+                <button class="start-button" data-sprite="button_start" onclick="Game.switchScreen('barn')">
+                    <div class="button-inner">
+                        <img class="horse-sprite" data-sprite="horse_main" src="assets/images/characters/horse_main.png" alt="horse">
+                        <div class="grass-decoration" data-sprite="grass_decoration"></div>
+                        <img class="start-text" data-sprite="text_start" src="assets/images/ui/text_start.png" alt="开始游戏">
+                        <span class="corner-dot left" data-sprite="corner_dot">●</span>
+                        <span class="corner-dot right" data-sprite="corner_dot">●</span>
+                    </div>
+                </button>
+                
                 <div class="menu-grid">
-                    <button class="menu-btn" onclick="Game.switchScreen('barn')">
-                        <span class="menu-icon barn-icon"></span>
-                        <span class="menu-text">养马屋</span>
+                    <button class="menu-btn" data-sprite="button_barn" onclick="Game.switchScreen('barn')">
+                        <img class="menu-icon" data-sprite="icon_barn" src="assets/images/icons/icon_barn.png" alt="barn">
+                        <img class="menu-text" data-sprite="text_barn" src="assets/images/ui/text_barn.png" alt="养马屋">
                     </button>
-                    <button class="menu-btn" onclick="Game.switchScreen('shop')">
-                        <span class="menu-icon shop-icon"></span>
-                        <span class="menu-text">商店</span>
+                    <button class="menu-btn" data-sprite="button_shop" onclick="Game.switchScreen('shop')">
+                        <img class="menu-icon" data-sprite="icon_shop" src="assets/images/icons/icon_shop.png" alt="shop">
+                        <img class="menu-text" data-sprite="text_shop" src="assets/images/ui/text_shop.png" alt="商店">
                     </button>
-                    <button class="menu-btn" onclick="Game.switchScreen('race')">
-                        <span class="menu-icon race-icon"></span>
-                        <span class="menu-text">赛场</span>
+                    <button class="menu-btn" data-sprite="button_race" onclick="Game.switchScreen('race')">
+                        <img class="menu-icon" data-sprite="icon_race" src="assets/images/icons/icon_race.png" alt="race">
+                        <img class="menu-text" data-sprite="text_race" src="assets/images/ui/text_race.png" alt="赛场">
                     </button>
-                    <button class="menu-btn" onclick="Game.showNotification('设置功能开发中', 'warning')">
-                        <span class="menu-icon settings-icon"></span>
-                        <span class="menu-text">设置</span>
+                    <button class="menu-btn" data-sprite="button_settings" onclick="Game.showNotification('设置功能开发中', 'warning')">
+                        <img class="menu-icon" data-sprite="icon_settings" src="assets/images/icons/icon_settings.png" alt="settings">
+                        <img class="menu-text" data-sprite="text_settings" src="assets/images/ui/text_settings.png" alt="设置">
                     </button>
                 </div>
                 
-                <div class="gold-bar">
+                <div class="gold-bar" data-sprite="gold_bar">
                     <span class="gold-icon">$</span>
                     <span class="gold-label">马币:</span>
                     <span class="gold-amount" id="main-gold">6000</span>
@@ -527,6 +510,7 @@
         <div class="notification-container" id="notifications"></div>
     </div>
 
+    <script src="assets/sprite_loader.js"></script>
     <script src="game.js"></script>
 </body>
 </html>

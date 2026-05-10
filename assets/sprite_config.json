@@ -1,0 +1,35 @@
+{
+  "texturePath": "./assets/images/",
+  "ui": {
+    "button_start": "ui/button_start.png",
+    "button_barn": "ui/button_barn.png",
+    "button_shop": "ui/button_shop.png",
+    "button_race": "ui/button_race.png",
+    "button_settings": "ui/button_settings.png",
+    "gold_bar": "ui/gold_bar.png",
+    "status_bar": "ui/status_bar.png",
+    "title_tian": "ui/title_tian.png",
+    "title_ji": "ui/title_ji.png",
+    "title_sai": "ui/title_sai.png",
+    "title_ma": "ui/title_ma.png",
+    "text_start": "ui/text_start.png",
+    "text_barn": "ui/text_barn.png",
+    "text_shop": "ui/text_shop.png",
+    "text_race": "ui/text_race.png",
+    "text_settings": "ui/text_settings.png",
+    "grass_decoration": "ui/grass_decoration.png",
+    "corner_dot": "ui/corner_dot.png"
+  },
+  "icons": {
+    "icon_barn": "icons/icon_barn.png",
+    "icon_shop": "icons/icon_shop.png",
+    "icon_race": "icons/icon_race.png",
+    "icon_settings": "icons/icon_settings.png"
+  },
+  "backgrounds": {
+    "bg_main": "backgrounds/bg_main.png"
+  },
+  "characters": {
+    "horse_main": "characters/horse_main.png"
+  }
+}
