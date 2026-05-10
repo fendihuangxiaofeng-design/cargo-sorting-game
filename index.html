@@ -10,55 +10,84 @@
 <body>
     <div id="game-container">
         <!-- 主界面 -->
-        <div id="main-screen" class="screen">
+        <div id="main-screen" class="screen landscape">
             <div class="screen-bg pixel-bg">
                 <div class="pixel-dots"></div>
+                <div class="corner-dots top-left"></div>
+                <div class="corner-dots top-right"></div>
+                <div class="corner-dots bottom-left"></div>
+                <div class="corner-dots bottom-right"></div>
+            </div>
+            
+            <div class="status-bar">
+                <span class="time">10:42</span>
+                <div class="status-icons">
+                    <span class="icon">📶</span>
+                    <span class="icon">📡</span>
+                    <span class="icon battery">🔋</span>
+                    <span class="battery-text">100%</span>
+                </div>
             </div>
             
             <div class="main-content">
                 <div class="game-title-container">
                     <h1 class="game-title">
-                        <span class="title-char" style="color: #FFD700">田</span>
-                        <span class="title-char" style="color: #FFFFFF">忌</span>
-                        <span class="title-char" style="color: #4CAF50">赛</span>
-                        <span class="title-char" style="color: #FFD700">马</span>
+                        <span class="title-char yellow">田</span>
+                        <span class="title-char white">忌</span>
+                        <span class="title-char green">赛</span>
+                        <span class="title-char yellow">马</span>
                     </h1>
                 </div>
                 
                 <div class="start-button" onclick="Game.switchScreen('barn')">
-                    <div class="horse-pixel">
-                        <div class="horse-body"></div>
-                        <div class="horse-head"></div>
-                        <div class="horse-tail"></div>
-                        <div class="horse-leg-front"></div>
-                        <div class="horse-leg-back"></div>
-                        <div class="horse-saddle"></div>
+                    <div class="button-inner">
+                        <div class="horse-pixel">
+                            <div class="hp-body"></div>
+                            <div class="hp-head"></div>
+                            <div class="hp-neck"></div>
+                            <div class="hp-tail"></div>
+                            <div class="hp-leg-front-left"></div>
+                            <div class="hp-leg-front-right"></div>
+                            <div class="hp-leg-back-left"></div>
+                            <div class="hp-leg-back-right"></div>
+                            <div class="hp-saddle"></div>
+                            <div class="hp-mane"></div>
+                        </div>
+                        <div class="grass-container">
+                            <div class="grass-row">
+                                <span class="grass"></span><span class="grass"></span><span class="grass"></span><span class="grass"></span><span class="grass"></span>
+                            </div>
+                            <div class="grass-row offset">
+                                <span class="grass"></span><span class="grass"></span><span class="grass"></span><span class="grass"></span><span class="grass"></span>
+                            </div>
+                        </div>
+                        <span class="start-text">开始游戏</span>
+                        <span class="corner-decoration left">●</span>
+                        <span class="corner-decoration right">●</span>
                     </div>
-                    <span class="start-text">开始游戏</span>
-                    <div class="grass-line"></div>
                 </div>
                 
                 <div class="menu-grid">
                     <button class="menu-btn" onclick="Game.switchScreen('barn')">
-                        <span class="menu-icon">🏠</span>
+                        <span class="menu-icon barn-icon"></span>
                         <span class="menu-text">养马屋</span>
                     </button>
                     <button class="menu-btn" onclick="Game.switchScreen('shop')">
-                        <span class="menu-icon">💰</span>
+                        <span class="menu-icon shop-icon"></span>
                         <span class="menu-text">商店</span>
                     </button>
                     <button class="menu-btn" onclick="Game.switchScreen('race')">
-                        <span class="menu-icon">🏁</span>
+                        <span class="menu-icon race-icon"></span>
                         <span class="menu-text">赛场</span>
                     </button>
                     <button class="menu-btn" onclick="Game.showNotification('设置功能开发中', 'warning')">
-                        <span class="menu-icon">⚙️</span>
+                        <span class="menu-icon settings-icon"></span>
                         <span class="menu-text">设置</span>
                     </button>
                 </div>
                 
                 <div class="gold-bar">
-                    <span class="gold-icon">💰</span>
+                    <span class="gold-icon">$</span>
                     <span class="gold-label">马币:</span>
                     <span class="gold-amount" id="main-gold">6000</span>
                 </div>
@@ -66,7 +95,7 @@
         </div>
 
         <!-- 养马屋界面 -->
-        <div id="barn-screen" class="screen hidden">
+        <div id="barn-screen" class="screen landscape hidden">
             <div class="screen-bg barn-bg">
                 <div class="barn-bg-roof"></div>
                 <div class="barn-bg-door"></div>
@@ -240,7 +269,7 @@
         </div>
 
         <!-- 商店界面 -->
-        <div id="shop-screen" class="screen hidden">
+        <div id="shop-screen" class="screen landscape hidden">
             <div class="screen-bg shop-bg">
                 <div class="shop-shelf-bg"></div>
             </div>
@@ -271,7 +300,7 @@
         </div>
 
         <!-- 赛场界面 -->
-        <div id="race-screen" class="screen hidden">
+        <div id="race-screen" class="screen landscape hidden">
             <div class="screen-bg race-bg">
                 <div class="race-track-bg"></div>
             </div>
@@ -363,7 +392,7 @@
         </div>
 
         <!-- 胜利界面 -->
-        <div id="victory-screen" class="screen hidden">
+        <div id="victory-screen" class="screen landscape hidden">
             <div class="screen-bg victory-bg">
                 <div class="trophy-icon">🏆</div>
             </div>
@@ -426,7 +455,7 @@
         </div>
 
         <!-- 失败界面 -->
-        <div id="defeat-screen" class="screen hidden">
+        <div id="defeat-screen" class="screen landscape hidden">
             <div class="screen-bg defeat-bg">
                 <div class="cloud-icon">☁️</div>
             </div>
