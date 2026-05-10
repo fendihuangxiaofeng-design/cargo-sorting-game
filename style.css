@@ -79,41 +79,34 @@ body {
 }
 
 .pixel-bg {
-  background: 
-    linear-gradient(180deg, #1a0f3e 0%, #2d1b69 50%, #1a0f3e 100%);
+  background: #5B2D87;
 }
 
-.pixel-bg .bg-layer {
+.pixel-dots {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  opacity: 0.3;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px);
+  background-size: 20px 20px;
 }
 
-.pixel-bg .bg-layer-1 {
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(78, 205, 196, 0.05) 2px,
-    rgba(78, 205, 196, 0.05) 4px
-  );
+.pixel-dots::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 30px 30px;
+  animation: pixelShift 4s linear infinite;
 }
 
-.pixel-bg .bg-layer-2 {
-  background: repeating-linear-gradient(
-    90deg,
-    transparent,
-    transparent 2px,
-    rgba(255, 107, 107, 0.03) 2px,
-    rgba(255, 107, 107, 0.03) 4px
-  );
-}
-
-.pixel-bg .bg-layer-3 {
-  background: radial-gradient(ellipse at 50% 30%, rgba(78, 205, 196, 0.1) 0%, transparent 50%);
+@keyframes pixelShift {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(30px, 30px); }
 }
 
 .barn-bg {
@@ -1821,40 +1814,287 @@ body {
   color: #FFFFFF;
 }
 
+.game-title-container {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.game-title {
+  font-family: var(--font-pixel);
+  font-size: 48px;
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  text-shadow: 4px 4px 0 #000000, 8px 8px 0 rgba(0,0,0,0.3);
+}
+
+.title-char {
+  display: inline-block;
+  animation: titleBounce 0.5s ease-in-out infinite;
+}
+
+.title-char:nth-child(1) { animation-delay: 0s; }
+.title-char:nth-child(2) { animation-delay: 0.1s; }
+.title-char:nth-child(3) { animation-delay: 0.2s; }
+.title-char:nth-child(4) { animation-delay: 0.3s; }
+
+@keyframes titleBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.start-button {
+  background: #FFFFFF;
+  border: 6px solid #000000;
+  border-radius: 16px;
+  padding: 24px 16px;
+  margin-bottom: 24px;
+  cursor: pointer;
+  box-shadow: 6px 6px 0 #000000;
+  transition: all 0.1s;
+  position: relative;
+  overflow: hidden;
+}
+
+.start-button:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 9px 9px 0 #000000;
+}
+
+.start-button:active {
+  transform: translate(3px, 3px);
+  box-shadow: 3px 3px 0 #000000;
+}
+
+.horse-pixel {
+  position: relative;
+  width: 120px;
+  height: 80px;
+  margin: 0 auto 16px;
+}
+
+.horse-body {
+  position: absolute;
+  width: 56px;
+  height: 28px;
+  background: #FFD700;
+  border: 4px solid #000000;
+  top: 28px;
+  left: 24px;
+  border-radius: 8px;
+}
+
+.horse-head {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  background: #FFD700;
+  border: 4px solid #000000;
+  top: 20px;
+  left: 76px;
+  border-radius: 50% 50% 30% 30%;
+}
+
+.horse-head::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 12px;
+  background: #4CAF50;
+  border: 2px solid #000000;
+  top: -10px;
+  left: 6px;
+  border-radius: 4px 4px 0 0;
+}
+
+.horse-tail {
+  position: absolute;
+  width: 16px;
+  height: 20px;
+  background: #4CAF50;
+  border: 4px solid #000000;
+  top: 24px;
+  left: 8px;
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+}
+
+.horse-leg-front {
+  position: absolute;
+  width: 8px;
+  height: 24px;
+  background: #000000;
+  top: 52px;
+  left: 68px;
+}
+
+.horse-leg-front::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 6px;
+  background: #FFFFFF;
+  border: 2px solid #000000;
+  bottom: -4px;
+  left: -2px;
+}
+
+.horse-leg-back {
+  position: absolute;
+  width: 8px;
+  height: 24px;
+  background: #000000;
+  top: 52px;
+  left: 36px;
+}
+
+.horse-leg-back::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 6px;
+  background: #FFFFFF;
+  border: 2px solid #000000;
+  bottom: -4px;
+  left: -2px;
+}
+
+.horse-saddle {
+  position: absolute;
+  width: 24px;
+  height: 12px;
+  background: #4CAF50;
+  border: 3px solid #000000;
+  top: 20px;
+  left: 40px;
+  border-radius: 4px;
+}
+
+.start-text {
+  display: block;
+  text-align: center;
+  font-family: var(--font-pixel);
+  font-size: 20px;
+  color: #000000;
+  margin-bottom: 8px;
+}
+
+.grass-line {
+  height: 8px;
+  background: repeating-linear-gradient(
+    90deg,
+    #4CAF50 0px,
+    #4CAF50 8px,
+    #2E7D32 8px,
+    #2E7D32 16px
+  );
+  border-top: 3px solid #000000;
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.menu-btn {
+  background: #4CAF50;
+  border: 4px solid #000000;
+  border-radius: 8px;
+  padding: 16px 12px;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 #000000;
+  transition: all 0.1s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.menu-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 #000000;
+}
+
+.menu-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #000000;
+}
+
+.menu-icon {
+  font-size: 32px;
+}
+
+.menu-text {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  color: #FFFFFF;
+  text-shadow: 1px 1px 0 #000000;
+}
+
+.gold-bar {
+  background: #FFD700;
+  border: 4px solid #000000;
+  border-radius: 8px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 4px 4px 0 #000000;
+}
+
+.gold-bar .gold-icon {
+  font-size: 24px;
+}
+
+.gold-bar .gold-label {
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  color: #000000;
+}
+
+.gold-bar .gold-amount {
+  font-family: var(--font-pixel);
+  font-size: 18px;
+  color: #000000;
+  font-weight: bold;
+}
+
 @media (min-width: 768px) {
   #game-container {
     max-width: 600px;
   }
-  
+
   .game-title {
-    font-size: 44px;
+    font-size: 56px;
   }
-  
+
   .barn-content {
     flex-direction: row;
     gap: 16px;
   }
-  
+
   .horse-preview {
     width: 40%;
   }
-  
+
   .parts-inventory {
     width: 30%;
   }
-  
+
   .horse-stats {
     width: 30%;
   }
-  
+
   .inventory-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .barn-actions {
     grid-template-columns: repeat(4, 1fr);
   }
-  
+
   .result-actions {
     flex-direction: row;
     justify-content: center;
