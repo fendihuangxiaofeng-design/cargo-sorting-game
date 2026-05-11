@@ -1,35 +1,69 @@
 {
   "texturePath": "./assets/images/",
   "ui": {
-    "button_start": "ui/button_start.png",
-    "button_barn": "ui/button_barn.png",
-    "button_shop": "ui/button_shop.png",
-    "button_race": "ui/button_race.png",
-    "button_settings": "ui/button_settings.png",
-    "gold_bar": "ui/gold_bar.png",
-    "status_bar": "ui/status_bar.png",
-    "title_tian": "ui/title_tian.png",
-    "title_ji": "ui/title_ji.png",
-    "title_sai": "ui/title_sai.png",
-    "title_ma": "ui/title_ma.png",
-    "text_start": "ui/text_start.png",
-    "text_barn": "ui/text_barn.png",
-    "text_shop": "ui/text_shop.png",
-    "text_race": "ui/text_race.png",
-    "text_settings": "ui/text_settings.png",
-    "grass_decoration": "ui/grass_decoration.png",
-    "corner_dot": "ui/corner_dot.png"
+    "button_start": "ui/main_button_start.png",
+    "button_barn": "ui/main_button_barn.png",
+    "button_shop": "ui/main_button_shop.png",
+    "button_race": "ui/main_button_race.png",
+    "button_settings": "ui/main_button_settings.png",
+    "gold_bar": "ui/main_gold_bar.png",
+    "status_bar": "ui/main_status_bar.png",
+    "title_tian": "ui/main_title_tian.png",
+    "title_ji": "ui/main_title_ji.png",
+    "title_sai": "ui/main_title_sai.png",
+    "title_ma": "ui/main_title_ma.png",
+    "text_start": "ui/main_text_start.png",
+    "text_barn": "ui/main_text_barn.png",
+    "text_shop": "ui/main_text_shop.png",
+    "text_race": "ui/main_text_race.png",
+    "text_settings": "ui/main_text_settings.png",
+    "grass_decoration": "ui/main_grass_decoration.png",
+    "corner_dot": "ui/main_corner_dot.png",
+    "barn_title_icon": "ui/barn_title_icon.png",
+    "barn_title_text": "ui/barn_title_text.png",
+    "barn_tab_1": "ui/barn_tab_1.png",
+    "barn_tab_2": "ui/barn_tab_2.png",
+    "barn_tab_3": "ui/barn_tab_3.png",
+    "barn_gold_icon": "ui/barn_gold_icon.png",
+    "barn_gold_label": "ui/barn_gold_label.png",
+    "barn_panel_title_inventory": "ui/barn_panel_title_inventory.png",
+    "barn_panel_title_horse": "ui/barn_panel_title_horse.png",
+    "barn_panel_title_stats": "ui/barn_panel_title_stats.png",
+    "barn_slot_head": "ui/barn_slot_head.png",
+    "barn_slot_body": "ui/barn_slot_body.png",
+    "barn_slot_legs": "ui/barn_slot_legs.png",
+    "barn_slot_tail": "ui/barn_slot_tail.png",
+    "barn_slot_special": "ui/barn_slot_special.png",
+    "barn_slot_headdress": "ui/barn_slot_headdress.png",
+    "barn_stat_speed": "ui/barn_stat_speed.png",
+    "barn_stat_power": "ui/barn_stat_power.png",
+    "barn_stat_stamina": "ui/barn_stat_stamina.png",
+    "barn_stat_magic": "ui/barn_stat_magic.png",
+    "barn_btn_save": "ui/barn_btn_save.png",
+    "barn_btn_sell": "ui/barn_btn_sell.png",
+    "barn_btn_shop": "ui/barn_btn_shop.png",
+    "barn_btn_race": "ui/barn_btn_race.png"
   },
   "icons": {
-    "icon_barn": "icons/icon_barn.png",
-    "icon_shop": "icons/icon_shop.png",
-    "icon_race": "icons/icon_race.png",
-    "icon_settings": "icons/icon_settings.png"
+    "icon_barn": "icons/main_icon_barn.png",
+    "icon_shop": "icons/main_icon_shop.png",
+    "icon_race": "icons/main_icon_race.png",
+    "icon_settings": "icons/main_icon_settings.png"
   },
   "backgrounds": {
-    "bg_main": "backgrounds/bg_main.png"
+    "bg_main": "backgrounds/main_bg.png",
+    "barn_bg": "backgrounds/barn_bg.png"
   },
   "characters": {
-    "horse_main": "characters/horse_main.png"
+    "horse_main": "characters/main_horse.png",
+    "barn_horse_default": "characters/barn_horse_default.png"
+  },
+  "parts": {
+    "barn_part_head": "parts/barn_part_head.png",
+    "barn_part_body": "parts/barn_part_body.png",
+    "barn_part_legs": "parts/barn_part_legs.png",
+    "barn_part_tail": "parts/barn_part_tail.png",
+    "barn_part_headdress": "parts/barn_part_headdress.png",
+    "barn_part_extra": "parts/barn_part_extra.png"
   }
 }

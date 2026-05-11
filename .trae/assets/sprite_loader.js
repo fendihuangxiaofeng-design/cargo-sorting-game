@@ -53,6 +53,11 @@ const SpriteLoader = (function() {
     }
     
     function getCategoryForKey(key) {
+        if (key.startsWith('main_')) return 'ui';
+        if (key.startsWith('barn_')) {
+            if (key.startsWith('barn_part_')) return 'parts';
+            return 'ui';
+        }
         if (key.startsWith('button_')) return 'ui';
         if (key.startsWith('title_')) return 'ui';
         if (key.startsWith('text_')) return 'ui';
@@ -96,6 +101,9 @@ const SpriteLoader = (function() {
         }
         if (config.characters) {
             Object.keys(config.characters).forEach(key => allKeys.push({ key, category: 'characters' }));
+        }
+        if (config.parts) {
+            Object.keys(config.parts).forEach(key => allKeys.push({ key, category: 'parts' }));
         }
         
         await Promise.all(allKeys.map(item => {

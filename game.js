@@ -147,7 +147,7 @@ const Game = {
     
     selectHorseTab(index) {
         GameState.currentHorse = index;
-        document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+        document.querySelectorAll('.barn-tab').forEach((btn, i) => {
             btn.classList.toggle('active', i === index);
         });
         this.updateHorseStats();
@@ -158,25 +158,25 @@ const Game = {
         const horse = GameState.horses[GameState.currentHorse];
         const stats = horse.stats;
         
-        document.querySelectorAll('.stat-bar').forEach(bar => bar.style.width = '0%');
-        document.querySelectorAll('.stat-value-num').forEach(el => el.textContent = '0');
+        const statBarSpeed = document.getElementById('stat-speed');
+        const statBarPower = document.getElementById('stat-power');
+        const statBarStamina = document.getElementById('stat-stamina');
+        const statBarMagic = document.getElementById('stat-magic');
         
-        if (stats.speed > 0) {
-            document.querySelector('.stat-bar.speed').style.width = Math.min(stats.speed, 100) + '%';
-            document.querySelectorAll('.stat-value-num')[0].textContent = stats.speed;
-        }
-        if (stats.power > 0) {
-            document.querySelector('.stat-bar.power').style.width = Math.min(stats.power, 100) + '%';
-            document.querySelectorAll('.stat-value-num')[1].textContent = stats.power;
-        }
-        if (stats.stamina > 0) {
-            document.querySelector('.stat-bar.stamina').style.width = Math.min(stats.stamina, 100) + '%';
-            document.querySelectorAll('.stat-value-num')[2].textContent = stats.stamina;
-        }
-        if (stats.magic > 0) {
-            document.querySelector('.stat-bar.magic').style.width = Math.min(stats.magic, 100) + '%';
-            document.querySelectorAll('.stat-value-num')[3].textContent = stats.magic;
-        }
+        const statValueSpeed = document.getElementById('stat-speed-value');
+        const statValuePower = document.getElementById('stat-power-value');
+        const statValueStamina = document.getElementById('stat-stamina-value');
+        const statValueMagic = document.getElementById('stat-magic-value');
+        
+        if (statBarSpeed) statBarSpeed.style.width = Math.min(stats.speed || 0, 100) + '%';
+        if (statBarPower) statBarPower.style.width = Math.min(stats.power || 0, 100) + '%';
+        if (statBarStamina) statBarStamina.style.width = Math.min(stats.stamina || 0, 100) + '%';
+        if (statBarMagic) statBarMagic.style.width = Math.min(stats.magic || 0, 100) + '%';
+        
+        if (statValueSpeed) statValueSpeed.textContent = stats.speed || 0;
+        if (statValuePower) statValuePower.textContent = stats.power || 0;
+        if (statValueStamina) statValueStamina.textContent = stats.stamina || 0;
+        if (statValueMagic) statValueMagic.textContent = stats.magic || 0;
     },
     
     updateHorseCards() {
@@ -212,19 +212,67 @@ const Game = {
     updatePreview() {
         const horse = GameState.horses[GameState.currentHorse];
         
-        document.getElementById('current-horse-name').textContent = horse.name;
+        const horseNameEl = document.getElementById('current-horse-name');
+        if (horseNameEl) {
+            horseNameEl.textContent = horse.name;
+        }
         
-        const parts = ['head', 'body', 'legs', 'tail', 'special'];
-        parts.forEach(partType => {
-            const el = document.getElementById('preview-' + partType);
-            if (horse.parts[partType]) {
-                el.textContent = horse.parts[partType].icon;
-                el.style.display = 'block';
-            } else {
-                el.textContent = '';
-                el.style.display = 'none';
+        const partTypes = ['head', 'body', 'legs', 'tail', 'special', 'headdress'];
+        partTypes.forEach(partType => {
+            const slotEl = document.querySelector(`.part-slot[data-type="${partType}"] .slot-icon`);
+            if (slotEl) {
+                if (horse.parts[partType]) {
+                    slotEl.src = this.getPartSpritePath(horse.parts[partType].type, horse.parts[partType].category);
+                    slotEl.style.display = 'block';
+                } else {
+                    slotEl.src = `assets/images/ui/barn_slot_${partType}.png`;
+                    slotEl.style.display = 'block';
+                }
             }
         });
+        
+        const assembledHorseEl = document.getElementById('assembled-horse');
+        if (assembledHorseEl) {
+            const hasParts = horse.parts.head || horse.parts.body || horse.parts.legs || horse.parts.tail;
+            if (hasParts) {
+                assembledHorseEl.src = this.getAssembledHorseSprite(horse);
+            } else {
+                assembledHorseEl.src = 'assets/images/characters/barn_horse_default.png';
+            }
+        }
+    },
+    
+    getPartSpritePath(type, category) {
+        const basePath = 'assets/images/parts/';
+        const paths = {
+            head: { common: 'barn_part_head.png', tech: 'barn_part_head.png', magic: 'barn_part_head.png' },
+            body: { common: 'barn_part_body.png', tech: 'barn_part_body.png', magic: 'barn_part_body.png' },
+            legs: { common: 'barn_part_legs.png', tech: 'barn_part_legs.png', magic: 'barn_part_legs.png' },
+            tail: { common: 'barn_part_tail.png', tech: 'barn_part_tail.png', magic: 'barn_part_tail.png' },
+            special: { common: 'barn_part_headdress.png', tech: 'barn_part_headdress.png', magic: 'barn_part_headdress.png' },
+            extra: { common: 'barn_part_extra.png', tech: 'barn_part_extra.png', magic: 'barn_part_extra.png' }
+        };
+        return basePath + (paths[type] && paths[type][category] ? paths[type][category] : `barn_part_${type}.png`);
+    },
+    
+    getAssembledHorseSprite(horse) {
+        const parts = horse.parts;
+        const hasHead = parts.head;
+        const hasBody = parts.body;
+        const hasLegs = parts.legs;
+        const hasTail = parts.tail;
+        
+        if (hasHead && hasBody && hasLegs && hasTail) {
+            const headCat = parts.head.category;
+            const bodyCat = parts.body.category;
+            const legsCat = parts.legs.category;
+            const tailCat = parts.tail.category;
+            
+            const dominantCat = headCat || bodyCat || legsCat || tailCat || 'common';
+            return `assets/images/characters/barn_horse_${dominantCat}.png`;
+        }
+        
+        return 'assets/images/characters/barn_horse_default.png';
     },
     
     updateInventoryCounts() {
