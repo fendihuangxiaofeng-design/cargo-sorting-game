@@ -397,46 +397,82 @@
             </div>
             
             <div class="race-arena hidden" id="race-arena">
-                <div class="race-header">
-                    <span class="round-badge">第 1 局</span>
-                    <div class="score-board">
-                        <span class="score player-score">0</span>
-                        <span class="score-divider">:</span>
-                        <span class="score opponent-score">0</span>
+                <div class="race-game-header">
+                    <div class="round-display">
+                        <img data-sprite="race_round_bg" src="assets/images/race/race_round_bg.png" alt="round bg">
+                        <div class="round-text" id="round-text">第1局</div>
                     </div>
-                    <div class="progress-indicator">
-                        <span class="progress-dot active"></span>
-                        <span class="progress-dot"></span>
-                        <span class="progress-dot"></span>
-                        <span class="flag-icon">🏁</span>
+                    
+                    <div class="score-display">
+                        <div class="score-side player-side">
+                            <img data-sprite="race_player_label" src="assets/images/race/race_player_label.png" alt="玩家">
+                            <div class="score-num player-score" id="game-player-score">0</div>
+                        </div>
+                        <img data-sprite="race_score_divider" src="assets/images/race/race_score_divider.png" alt=":">
+                        <div class="score-side opponent-side">
+                            <div class="score-num opponent-score" id="game-opponent-score">0</div>
+                            <img data-sprite="race_opponent_label" src="assets/images/race/race_opponent_label.png" alt="系统">
+                        </div>
+                    </div>
+                    
+                    <div class="progress-display">
+                        <img data-sprite="race_progress_bg" src="assets/images/race/race_progress_bg.png" alt="progress bg">
+                        <div class="progress-dots">
+                            <span class="progress-dot active" id="progress-dot-1"></span>
+                            <span class="progress-dot" id="progress-dot-2"></span>
+                            <span class="progress-dot" id="progress-dot-3"></span>
+                        </div>
+                        <img data-sprite="race_flag_small" src="assets/images/race/race_flag_small.png" alt="flag">
                     </div>
                 </div>
                 
-                <div class="race-track">
-                    <div class="track-bg">
-                        <div class="track-line"></div>
-                        <div class="track-lane player-lane">
-                            <div class="horse-sprite" id="player-horse">🐴</div>
-                            <div class="horse-name-label player">的卢</div>
-                            <div class="stamina-bar">
-                                <div class="stamina-fill" id="player-stamina"></div>
+                <div class="race-scene">
+                    <div class="scene-bg">
+                        <img data-sprite="race_scene_bg" src="assets/images/race/race_scene_bg.png" alt="scene bg">
+                    </div>
+                    
+                    <div class="track-container">
+                        <div class="track-lanes">
+                            <div class="lane player-lane">
+                                <div class="horse-container" id="player-horse-container">
+                                    <img class="player-horse" id="player-horse" data-sprite="race_horse_player" src="assets/images/race/race_horse_player.png" alt="player horse">
+                                </div>
+                            </div>
+                            <div class="lane opponent-lane">
+                                <div class="horse-container" id="opponent-horse-container">
+                                    <img class="opponent-horse" id="opponent-horse" data-sprite="race_horse_opponent_game" src="assets/images/race/race_horse_opponent_game.png" alt="opponent horse">
+                                </div>
                             </div>
                         </div>
-                        <div class="track-lane opponent-lane">
-                            <div class="horse-sprite" id="opponent-horse">🐎</div>
-                            <div class="horse-name-label opponent">爪黄飞电</div>
+                    </div>
+                </div>
+                
+                <div class="race-bottom-panel">
+                    <div class="horse-info player-info">
+                        <div class="horse-head-icon">
+                            <img data-sprite="race_player_head" src="assets/images/race/race_player_head.png" alt="player head">
+                        </div>
+                        <div class="horse-name" id="game-player-horse-name">的卢</div>
+                        <div class="stamina-container">
+                            <span class="stamina-label">体力值</span>
+                            <div class="stamina-bar">
+                                <div class="stamina-fill player" id="player-stamina"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="horse-info opponent-info">
+                        <div class="horse-head-icon">
+                            <img data-sprite="race_opponent_head" src="assets/images/race/race_opponent_head.png" alt="opponent head">
+                        </div>
+                        <div class="horse-name" id="game-opponent-horse-name">爪黄飞电</div>
+                        <div class="stamina-container">
+                            <span class="stamina-label">体力值</span>
                             <div class="stamina-bar">
                                 <div class="stamina-fill opponent" id="opponent-stamina"></div>
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="race-controls">
-                    <button class="btn btn-warning btn-action" onclick="Game.raceAction()">
-                        <span class="action-icon">⚡</span>
-                        <span class="action-text">加速!</span>
-                    </button>
                 </div>
             </div>
         </div>

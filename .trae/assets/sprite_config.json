@@ -66,11 +66,7 @@
     "race_panel_title_opponent": "ui/race_panel_title_opponent.png",
     "race_vs": "ui/race_vs.png",
     "race_flag": "ui/race_flag.png",
-    "race_btn_start": "ui/race_btn_start.png",
-    "race_horse_player_1": "race/race_horse_player_1.png",
-    "race_horse_player_2": "race/race_horse_player_2.png",
-    "race_horse_player_3": "race/race_horse_player_3.png",
-    "race_horse_opponent": "race/race_horse_opponent.png"
+    "race_btn_start": "ui/race_btn_start.png"
   },
   "backgrounds": {
     "main_bg": "backgrounds/main_bg.png",
@@ -97,6 +93,17 @@
     "race_horse_player_1": "race/race_horse_player_1.png",
     "race_horse_player_2": "race/race_horse_player_2.png",
     "race_horse_player_3": "race/race_horse_player_3.png",
-    "race_horse_opponent": "race/race_horse_opponent.png"
+    "race_horse_opponent": "race/race_horse_opponent.png",
+    "race_round_bg": "race/race_round_bg.png",
+    "race_player_label": "race/race_player_label.png",
+    "race_opponent_label": "race/race_opponent_label.png",
+    "race_score_divider": "race/race_score_divider.png",
+    "race_progress_bg": "race/race_progress_bg.png",
+    "race_flag_small": "race/race_flag_small.png",
+    "race_scene_bg": "race/race_scene_bg.png",
+    "race_horse_player": "race/race_horse_player.png",
+    "race_horse_opponent_game": "race/race_horse_opponent_game.png",
+    "race_player_head": "race/race_player_head.png",
+    "race_opponent_head": "race/race_opponent_head.png"
   }
 }

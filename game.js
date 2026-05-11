@@ -454,6 +454,7 @@ const Game = {
         document.getElementById('race-prep').classList.add('hidden');
         document.getElementById('race-arena').classList.remove('hidden');
         
+        this.updateRaceUI(0);
         this.runRaceRound();
     },
     
@@ -476,6 +477,48 @@ const Game = {
         return horses;
     },
     
+    updateRaceUI(round) {
+        const data = GameState.raceData;
+        if (!data) return;
+        
+        const roundText = document.getElementById('round-text');
+        const playerScore = document.getElementById('game-player-score');
+        const opponentScore = document.getElementById('game-opponent-score');
+        
+        if (roundText) roundText.textContent = `第${round + 1}局`;
+        if (playerScore) playerScore.textContent = data.playerScore;
+        if (opponentScore) opponentScore.textContent = data.opponentScore;
+        
+        for (let i = 0; i < 3; i++) {
+            const dot = document.getElementById(`progress-dot-${i + 1}`);
+            if (dot) {
+                dot.classList.toggle('active', i <= round);
+            }
+        }
+        
+        const playerHorse = data.playerHorses[round] || data.playerHorses[0];
+        const opponentHorse = data.opponentHorses[round];
+        
+        const playerHorseName = document.getElementById('game-player-horse-name');
+        const opponentHorseName = document.getElementById('game-opponent-horse-name');
+        if (playerHorseName) playerHorseName.textContent = playerHorse.name;
+        if (opponentHorseName) opponentHorseName.textContent = opponentHorse.name;
+        
+        this.updateHorseDisplay(playerHorse, 'player');
+    },
+    
+    updateHorseDisplay(horse, type) {
+        const horseImg = document.getElementById(type === 'player' ? 'player-horse' : 'opponent-horse');
+        if (!horseImg) return;
+        
+        const horseIndex = GameState.horses.findIndex(h => h === horse);
+        if (horseIndex >= 0) {
+            const spriteKey = `race_horse_player_${horseIndex + 1}`;
+            horseImg.src = `assets/images/race/${spriteKey}.png`;
+            horseImg.dataset.sprite = spriteKey;
+        }
+    },
+    
     runRaceRound() {
         const data = GameState.raceData;
         if (!data) return;
@@ -484,24 +527,19 @@ const Game = {
         const playerHorse = data.playerHorses[round] || data.playerHorses[0];
         const opponentHorse = data.opponentHorses[round];
         
-        document.querySelector('.round-badge').textContent = `第 ${round + 1} 局`;
-        document.querySelector('.player-score').textContent = data.playerScore;
-        document.querySelector('.opponent-score').textContent = data.opponentScore;
-        
-        document.querySelector('.player-lane .horse-name-label').textContent = playerHorse.name;
-        document.querySelector('.opponent-lane .horse-name-label').textContent = opponentHorse.name;
+        this.updateRaceUI(round);
         
         const playerProgress = document.getElementById('player-stamina');
         const opponentProgress = document.getElementById('opponent-stamina');
-        playerProgress.style.width = '100%';
-        opponentProgress.style.width = '100%';
+        if (playerProgress) playerProgress.style.width = '100%';
+        if (opponentProgress) opponentProgress.style.width = '100%';
         
         let playerPos = 0;
         let opponentPos = 0;
-        const playerHorseEl = document.getElementById('player-horse');
-        const opponentHorseEl = document.getElementById('opponent-horse');
-        playerHorseEl.style.left = '0';
-        opponentHorseEl.style.left = '0';
+        const playerHorseContainer = document.getElementById('player-horse-container');
+        const opponentHorseContainer = document.getElementById('opponent-horse-container');
+        if (playerHorseContainer) playerHorseContainer.style.left = '0';
+        if (opponentHorseContainer) opponentHorseContainer.style.left = '0';
         
         const raceInterval = setInterval(() => {
             const playerSpeed = this.calculateSpeed(playerHorse.stats);
@@ -514,11 +552,11 @@ const Game = {
             playerPos = Math.min(playerPos, maxPos);
             opponentPos = Math.min(opponentPos, maxPos);
             
-            playerHorseEl.style.left = playerPos + '%';
-            opponentHorseEl.style.left = opponentPos + '%';
+            if (playerHorseContainer) playerHorseContainer.style.left = playerPos + '%';
+            if (opponentHorseContainer) opponentHorseContainer.style.left = opponentPos + '%';
             
-            playerProgress.style.width = Math.max(0, 100 - playerPos) + '%';
-            opponentProgress.style.width = Math.max(0, 100 - opponentPos) + '%';
+            if (playerProgress) playerProgress.style.width = Math.max(0, 100 - playerPos) + '%';
+            if (opponentProgress) opponentProgress.style.width = Math.max(0, 100 - opponentPos) + '%';
             
             if (playerPos >= maxPos || opponentPos >= maxPos) {
                 clearInterval(raceInterval);
@@ -561,6 +599,7 @@ const Game = {
             const winner = data.playerScore > data.opponentScore;
             this.endRace(winner);
         } else {
+            this.updateRaceUI(data.currentRound);
             this.runRaceRound();
         }
     },
