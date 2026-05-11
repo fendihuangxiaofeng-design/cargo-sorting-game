@@ -30,32 +30,22 @@
                     </div>
                 </div>
                 
-                <button class="start-button" data-sprite="main_button_start" onclick="Game.switchScreen('barn')">
-                    <div class="button-inner">
-                        <img class="horse-sprite" data-sprite="main_horse" src="assets/images/characters/main_horse.png" alt="horse">
-                        <div class="grass-decoration" data-sprite="main_grass_decoration"></div>
-                        <img class="start-text" data-sprite="main_text_start" src="assets/images/ui/main_text_start.png" alt="开始游戏">
-                        <span class="corner-dot left" data-sprite="main_corner_dot">●</span>
-                        <span class="corner-dot right" data-sprite="main_corner_dot">●</span>
-                    </div>
+                <button class="start-button" onclick="Game.switchScreen('barn')">
+                    <img data-sprite="main_button_start" src="assets/images/ui/main_button_start.png" alt="开始游戏">
                 </button>
                 
                 <div class="menu-grid">
-                    <button class="menu-btn" data-sprite="main_button_barn" onclick="Game.switchScreen('barn')">
-                        <img class="menu-icon" data-sprite="main_icon_barn" src="assets/images/icons/main_icon_barn.png" alt="barn">
-                        <img class="menu-text" data-sprite="main_text_barn" src="assets/images/ui/main_text_barn.png" alt="养马屋">
+                    <button class="menu-btn" onclick="Game.switchScreen('barn')">
+                        <img data-sprite="main_button_barn" src="assets/images/ui/main_button_barn.png" alt="养马屋">
                     </button>
-                    <button class="menu-btn" data-sprite="main_button_shop" onclick="Game.switchScreen('shop')">
-                        <img class="menu-icon" data-sprite="main_icon_shop" src="assets/images/icons/main_icon_shop.png" alt="shop">
-                        <img class="menu-text" data-sprite="main_text_shop" src="assets/images/ui/main_text_shop.png" alt="商店">
+                    <button class="menu-btn" onclick="Game.switchScreen('shop')">
+                        <img data-sprite="main_button_shop" src="assets/images/ui/main_button_shop.png" alt="商店">
                     </button>
-                    <button class="menu-btn" data-sprite="main_button_race" onclick="Game.switchScreen('race')">
-                        <img class="menu-icon" data-sprite="main_icon_race" src="assets/images/icons/main_icon_race.png" alt="race">
-                        <img class="menu-text" data-sprite="main_text_race" src="assets/images/ui/main_text_race.png" alt="赛场">
+                    <button class="menu-btn" onclick="Game.switchScreen('race')">
+                        <img data-sprite="main_button_race" src="assets/images/ui/main_button_race.png" alt="赛场">
                     </button>
-                    <button class="menu-btn" data-sprite="main_button_settings" onclick="Game.showNotification('设置功能开发中', 'warning')">
-                        <img class="menu-icon" data-sprite="main_icon_settings" src="assets/images/icons/main_icon_settings.png" alt="settings">
-                        <img class="menu-text" data-sprite="main_text_settings" src="assets/images/ui/main_text_settings.png" alt="设置">
+                    <button class="menu-btn" onclick="Game.showNotification('设置功能开发中', 'warning')">
+                        <img data-sprite="main_button_settings" src="assets/images/ui/main_button_settings.png" alt="设置">
                     </button>
                 </div>
                 

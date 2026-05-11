@@ -189,23 +189,11 @@ body {
   margin-bottom: 30px;
 }
 
-.button-inner {
-  background: transparent;
-  border: none;
-  border-radius: 16px;
-  padding: 20px 40px;
-  position: relative;
-  box-shadow: none;
-  transition: all 0.15s;
-  min-width: 400px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.button-inner:hover {
-  transform: none;
-  box-shadow: none;
+.start-button img {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  display: block;
 }
 
 .button-inner:active {
@@ -272,14 +260,17 @@ body {
   background: transparent;
   border: none;
   border-radius: 10px;
-  padding: 20px 12px;
+  padding: 0;
   cursor: pointer;
   box-shadow: none;
   transition: all 0.15s;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
+}
+
+.menu-btn img {
+  width: 100%;
+  max-width: 120px;
+  height: auto;
+  display: block;
 }
 
 .menu-btn:hover {
