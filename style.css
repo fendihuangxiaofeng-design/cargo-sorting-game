@@ -2,7 +2,7 @@
   --color-primary: #FF6B6B;
   --color-secondary: #4CAF50;
   --color-warning: #FFD700;
-  --color-bg: #5B2D87;
+  --color-bg: #4D25D4;
   --color-text-dark: #000000;
   --font-pixel: 'Press Start 2P', cursive;
   --font-mono: 'VT323', monospace;
@@ -64,7 +64,7 @@ body {
 }
 
 .pixel-bg {
-  background: #5B2D87;
+  background: #4D25D4;
 }
 
 [data-sprite] {
@@ -83,7 +83,7 @@ body {
 }
 
 .screen-bg[data-sprite="bg_main"] {
-  background: #5B2D87;
+  background: #4D25D4;
   background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px);
   background-size: 16px 16px;
 }
