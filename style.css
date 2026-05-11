@@ -379,23 +379,28 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 24px;
+  padding: 16px 32px;
 }
 
 .barn-title {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 
-.barn-title img {
-  height: 48px;
+.barn-title img:first-child {
+  height: 64px;
+  object-fit: contain;
+}
+
+.barn-title img:last-child {
+  height: 56px;
   object-fit: contain;
 }
 
 .barn-tabs {
   display: flex;
-  gap: 12px;
+  gap: 16px;
 }
 
 .barn-tab {
@@ -406,7 +411,7 @@ body {
 }
 
 .barn-tab img {
-  height: 48px;
+  height: 56px;
   object-fit: contain;
   opacity: 0.5;
 }
@@ -418,43 +423,44 @@ body {
 .barn-gold {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 }
 
 .barn-gold img {
-  height: 36px;
+  height: 48px;
   object-fit: contain;
 }
 
 .barn-gold-label {
   font-family: var(--font-pixel);
-  font-size: 14px;
+  font-size: 18px;
   color: #FFD700;
 }
 
 .barn-gold-value {
   font-family: var(--font-pixel);
-  font-size: 20px;
+  font-size: 28px;
   color: #FFD700;
   font-weight: bold;
 }
 
 .barn-content {
   display: flex;
-  gap: 16px;
-  padding: 0 24px;
+  gap: 24px;
+  padding: 0 32px;
   flex: 1;
 }
 
 .barn-panel {
-  background: transparent;
-  border: none;
-  border-radius: 12px;
-  padding: 0;
+  background: #FFFFFF;
+  border: 4px solid #000000;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 4px 4px 0 #000000;
 }
 
 .panel-header {
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .panel-header img {
@@ -469,36 +475,36 @@ body {
 .inventory-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  gap: 12px;
 }
 
 .inv-item {
-  background: transparent;
-  border: none;
-  border-radius: 8px;
-  padding: 8px;
+  background: #E8E8E8;
+  border: 3px solid #000000;
+  border-radius: 12px;
+  padding: 12px;
   cursor: pointer;
   text-align: center;
 }
 
 .inv-item .inv-icon {
   width: 100%;
-  max-width: 64px;
+  max-width: 80px;
   height: auto;
   object-fit: contain;
 }
 
 .inv-label {
   font-family: var(--font-mono);
-  font-size: 10px;
-  color: #FFFFFF;
+  font-size: 14px;
+  color: #000000;
   display: block;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .inv-count {
   font-family: var(--font-pixel);
-  font-size: 10px;
+  font-size: 12px;
   color: #FF6B6B;
 }
 
@@ -509,17 +515,21 @@ body {
 
 .horse-assembly-area {
   position: relative;
-  min-height: 280px;
+  min-height: 320px;
 }
 
 .part-slot {
   position: absolute;
   text-align: center;
+  background: #FFFFFF;
+  border: 3px solid #000000;
+  border-radius: 8px;
+  padding: 8px;
 }
 
 .part-slot .slot-icon {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   object-fit: contain;
 }
 
@@ -530,25 +540,25 @@ body {
 }
 
 .part-slot-body {
-  top: 60px;
+  top: 70px;
   left: 50%;
   transform: translateX(-50%);
 }
 
 .part-slot-legs {
-  bottom: 40px;
+  bottom: 60px;
   left: 50%;
   transform: translateX(-50%);
 }
 
 .part-slot-tail {
-  top: 80px;
-  right: 20px;
+  top: 100px;
+  right: 10px;
 }
 
 .part-slot-special {
-  top: 80px;
-  left: 20px;
+  top: 100px;
+  left: 10px;
 }
 
 .part-slot-headdress {
@@ -559,8 +569,8 @@ body {
 
 .slot-label {
   font-family: var(--font-mono);
-  font-size: 8px;
-  color: #FFFFFF;
+  font-size: 10px;
+  color: #000000;
   display: block;
 }
 
@@ -573,17 +583,17 @@ body {
 }
 
 .assembled-horse {
-  width: 160px;
-  height: 120px;
+  width: 200px;
+  height: 150px;
   object-fit: contain;
 }
 
 .horse-name-display {
   text-align: center;
   font-family: var(--font-mono);
-  font-size: 16px;
-  color: #FFFFFF;
-  margin-top: 8px;
+  font-size: 18px;
+  color: #000000;
+  margin-top: 12px;
 }
 
 .stats-panel {
@@ -593,56 +603,71 @@ body {
 .stats-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .stat-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .stat-icon {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   object-fit: contain;
 }
 
 .stat-label {
   font-family: var(--font-mono);
-  font-size: 12px;
-  color: #FFFFFF;
-  width: 40px;
+  font-size: 16px;
+  color: #000000;
+  width: 48px;
 }
 
 .stat-bar-container {
   flex: 1;
-  height: 16px;
-  background: #16213E;
-  border: 2px solid #000000;
-  border-radius: 4px;
+  height: 20px;
+  background: #FFFFFF;
+  border: 3px solid #000000;
+  border-radius: 6px;
   overflow: hidden;
 }
 
 .stat-bar {
   height: 100%;
-  background: #4CAF50;
   width: 0%;
   transition: width 0.3s ease;
 }
 
+.stat-bar.speed {
+  background: #4CAF50;
+}
+
+.stat-bar.power {
+  background: #3498DB;
+}
+
+.stat-bar.stamina {
+  background: #FF9800;
+}
+
+.stat-bar.magic {
+  background: #9B59B6;
+}
+
 .stat-value {
   font-family: var(--font-pixel);
-  font-size: 14px;
-  color: #FFFFFF;
-  width: 36px;
+  font-size: 18px;
+  color: #000000;
+  width: 44px;
   text-align: right;
 }
 
 .barn-actions {
   display: flex;
-  gap: 12px;
-  padding: 16px 24px;
+  gap: 24px;
+  padding: 20px 32px;
 }
 
 .barn-btn {
@@ -656,6 +681,7 @@ body {
 .barn-btn img {
   width: 100%;
   object-fit: contain;
+  min-height: 60px;
 }
 
 .modal-overlay {
