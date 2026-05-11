@@ -3,52 +3,607 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>货物归类游戏</title>
+    <title>田忌赛马 - Tian Ji's Horse Racing</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="game-container">
-        <!-- 开始界面 -->
-        <div id="start-screen" class="screen">
-            <h1>货物归类</h1>
-            <p class="subtitle">滑动货物到正确的货架</p>
-            <button id="start-btn">开始游戏</button>
-            <div class="how-to-play">
-                <h3>游戏说明</h3>
-                <p>1. 滑动货物，扔到对应颜色的货架</p>
-                <p>2. 扔错或漏掉货物会扣血</p>
-                <p>3. 血条归零游戏结束</p>
+        <!-- 主界面 -->
+        <div id="main-screen" class="screen landscape">
+            <div class="screen-bg" data-sprite="bg_main"></div>
+            
+            <div class="corner-dots-container">
+                <div class="corner-dots top-left"></div>
+                <div class="corner-dots top-right"></div>
+                <div class="corner-dots bottom-left"></div>
+                <div class="corner-dots bottom-right"></div>
             </div>
-        </div>
-
-        <!-- 游戏界面 -->
-        <div id="game-screen" class="screen hidden">
-            <canvas id="game-canvas"></canvas>
-            <div id="ui-overlay">
-                <div id="score-display">分数: <span id="score">0</span></div>
-                <div id="health-bar-container">
-                    <div id="health-bar"></div>
+            
+            <div class="main-content">
+                <div class="game-title-container">
+                    <div class="game-title">
+                        <img class="title-char" data-sprite="main_title_tian" src="assets/images/ui/main_title_tian.png" alt="田">
+                        <img class="title-char" data-sprite="main_title_ji" src="assets/images/ui/main_title_ji.png" alt="忌">
+                        <img class="title-char" data-sprite="main_title_sai" src="assets/images/ui/main_title_sai.png" alt="赛">
+                        <img class="title-char" data-sprite="main_title_ma" src="assets/images/ui/main_title_ma.png" alt="马">
+                    </div>
+                </div>
+                
+                <button class="start-button" onclick="Game.switchScreen('barn')">
+                    <img data-sprite="main_button_start" src="assets/images/ui/main_button_start.png" alt="开始游戏">
+                </button>
+                
+                <div class="menu-grid">
+                    <button class="menu-btn" onclick="Game.switchScreen('barn')">
+                        <img data-sprite="main_button_barn" src="assets/images/ui/main_button_barn.png" alt="养马屋">
+                    </button>
+                    <button class="menu-btn" onclick="Game.switchScreen('shop')">
+                        <img data-sprite="main_button_shop" src="assets/images/ui/main_button_shop.png" alt="商店">
+                    </button>
+                    <button class="menu-btn" onclick="Game.switchScreen('race')">
+                        <img data-sprite="main_button_race" src="assets/images/ui/main_button_race.png" alt="赛场">
+                    </button>
+                    <button class="menu-btn" onclick="Game.showNotification('设置功能开发中', 'warning')">
+                        <img data-sprite="main_button_settings" src="assets/images/ui/main_button_settings.png" alt="设置">
+                    </button>
+                </div>
+                
+                <div class="gold-bar" data-sprite="gold_bar">
+                    <span class="gold-icon">$</span>
+                    <span class="gold-label">马币:</span>
+                    <span class="gold-amount" id="main-gold">6000</span>
                 </div>
             </div>
         </div>
 
-        <!-- 游戏结束界面 -->
-        <div id="end-screen" class="screen hidden">
-            <h1>游戏结束</h1>
-            <div id="final-score-display">
-                <p>最终分数</p>
-                <p id="final-score">0</p>
+        <!-- 养马屋界面 -->
+        <div id="barn-screen" class="screen landscape hidden">
+            <div class="screen-bg" data-sprite="barn_bg"></div>
+            
+            <div class="barn-header">
+                <div class="barn-title">
+                    <img data-sprite="barn_title_icon" src="assets/images/ui/barn_title_icon.png" alt="title icon">
+                    <img data-sprite="barn_title_text" src="assets/images/ui/barn_title_text.png" alt="养马屋">
+                </div>
+                
+                <div class="barn-tabs">
+                    <button class="barn-tab active" data-horse="0" onclick="Game.selectHorseTab(0)">
+                        <img data-sprite="barn_tab_1" src="assets/images/ui/barn_tab_1.png" alt="1号马">
+                    </button>
+                    <button class="barn-tab" data-horse="1" onclick="Game.selectHorseTab(1)">
+                        <img data-sprite="barn_tab_2" src="assets/images/ui/barn_tab_2.png" alt="2号马">
+                    </button>
+                    <button class="barn-tab" data-horse="2" onclick="Game.selectHorseTab(2)">
+                        <img data-sprite="barn_tab_3" src="assets/images/ui/barn_tab_3.png" alt="3号马">
+                    </button>
+                </div>
+                
+                <div class="barn-gold">
+                    <img data-sprite="barn_gold_icon" src="assets/images/ui/barn_gold_icon.png" alt="gold">
+                    <span class="barn-gold-label" data-sprite="barn_gold_label">马币:</span>
+                    <span class="barn-gold-value" id="barn-gold">6000</span>
+                </div>
             </div>
-            <div id="leaderboard">
-                <h3>好友排行榜</h3>
-                <ul id="leaderboard-list"></ul>
-                <p id="player-rank"></p>
+            
+            <div class="barn-content">
+                <div class="barn-panel inventory-panel">
+                    <div class="panel-header">
+                        <img data-sprite="barn_panel_title_inventory" src="assets/images/ui/barn_panel_title_inventory.png" alt="部件库存">
+                    </div>
+                    <div class="inventory-grid" id="parts-inventory">
+                        <div class="inv-item" data-type="head" onclick="Game.openPartSelector('head')">
+                            <img class="inv-icon" data-sprite="barn_part_head" src="assets/images/parts/barn_part_head.png" alt="马头">
+                            <span class="inv-label">马头</span>
+                            <span class="inv-count" id="count-head">0</span>
+                        </div>
+                        <div class="inv-item" data-type="body" onclick="Game.openPartSelector('body')">
+                            <img class="inv-icon" data-sprite="barn_part_body" src="assets/images/parts/barn_part_body.png" alt="马身">
+                            <span class="inv-label">马身</span>
+                            <span class="inv-count" id="count-body">0</span>
+                        </div>
+                        <div class="inv-item" data-type="legs" onclick="Game.openPartSelector('legs')">
+                            <img class="inv-icon" data-sprite="barn_part_legs" src="assets/images/parts/barn_part_legs.png" alt="马腿">
+                            <span class="inv-label">马腿</span>
+                            <span class="inv-count" id="count-legs">0</span>
+                        </div>
+                        <div class="inv-item" data-type="tail" onclick="Game.openPartSelector('tail')">
+                            <img class="inv-icon" data-sprite="barn_part_tail" src="assets/images/parts/barn_part_tail.png" alt="马尾">
+                            <span class="inv-label">马尾</span>
+                            <span class="inv-count" id="count-tail">0</span>
+                        </div>
+                        <div class="inv-item" data-type="special" onclick="Game.openPartSelector('special')">
+                            <img class="inv-icon" data-sprite="barn_part_headdress" src="assets/images/parts/barn_part_headdress.png" alt="头饰">
+                            <span class="inv-label">头饰</span>
+                            <span class="inv-count" id="count-special">0</span>
+                        </div>
+                        <div class="inv-item" data-type="extra" onclick="Game.openPartSelector('extra')">
+                            <img class="inv-icon" data-sprite="barn_part_extra" src="assets/images/parts/barn_part_extra.png" alt="特殊">
+                            <span class="inv-label">特殊</span>
+                            <span class="inv-count" id="count-extra">0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="barn-panel horse-panel">
+                    <div class="panel-header">
+                        <img data-sprite="barn_panel_title_horse" src="assets/images/ui/barn_panel_title_horse.png" alt="当前马匹">
+                    </div>
+                    <div class="horse-assembly-area">
+                        <div class="part-slot part-slot-head" data-type="head">
+                            <img class="slot-icon" data-sprite="barn_slot_head" src="assets/images/ui/barn_slot_head.png" alt="马头">
+                            <span class="slot-label">马头</span>
+                        </div>
+                        <div class="part-slot part-slot-tail" data-type="tail">
+                            <img class="slot-icon" data-sprite="barn_slot_tail" src="assets/images/ui/barn_slot_tail.png" alt="马尾">
+                            <span class="slot-label">马尾</span>
+                        </div>
+                        <div class="part-slot part-slot-body" data-type="body">
+                            <img class="slot-icon" data-sprite="barn_slot_body" src="assets/images/ui/barn_slot_body.png" alt="马身">
+                            <span class="slot-label">马身</span>
+                        </div>
+                        <div class="part-slot part-slot-special" data-type="special">
+                            <img class="slot-icon" data-sprite="barn_slot_special" src="assets/images/ui/barn_slot_special.png" alt="特殊">
+                            <span class="slot-label">特殊</span>
+                        </div>
+                        <div class="part-slot part-slot-legs" data-type="legs">
+                            <img class="slot-icon" data-sprite="barn_slot_legs" src="assets/images/ui/barn_slot_legs.png" alt="马腿">
+                            <span class="slot-label">马腿</span>
+                        </div>
+                        <div class="part-slot part-slot-headdress" data-type="headdress">
+                            <img class="slot-icon" data-sprite="barn_slot_headdress" src="assets/images/ui/barn_slot_headdress.png" alt="头饰">
+                            <span class="slot-label">头饰</span>
+                        </div>
+                        <div class="horse-preview">
+                            <img class="assembled-horse" id="assembled-horse" data-sprite="barn_horse_default" src="assets/images/characters/barn_horse_default.png" alt="马">
+                        </div>
+                    </div>
+                    <div class="horse-name-display" id="current-horse-name">的卢</div>
+                </div>
+                
+                <div class="barn-panel stats-panel">
+                    <div class="panel-header">
+                        <img data-sprite="barn_panel_title_stats" src="assets/images/ui/barn_panel_title_stats.png" alt="属性">
+                    </div>
+                    <div class="stats-list">
+                        <div class="stat-item">
+                            <img class="stat-icon" data-sprite="barn_stat_speed" src="assets/images/ui/barn_stat_speed.png" alt="速度">
+                            <span class="stat-label">速度</span>
+                            <div class="stat-bar-container">
+                                <div class="stat-bar speed" id="stat-speed"></div>
+                            </div>
+                            <span class="stat-value" id="stat-speed-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <img class="stat-icon" data-sprite="barn_stat_power" src="assets/images/ui/barn_stat_power.png" alt="力量">
+                            <span class="stat-label">力量</span>
+                            <div class="stat-bar-container">
+                                <div class="stat-bar power" id="stat-power"></div>
+                            </div>
+                            <span class="stat-value" id="stat-power-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <img class="stat-icon" data-sprite="barn_stat_stamina" src="assets/images/ui/barn_stat_stamina.png" alt="耐力">
+                            <span class="stat-label">耐力</span>
+                            <div class="stat-bar-container">
+                                <div class="stat-bar stamina" id="stat-stamina"></div>
+                            </div>
+                            <span class="stat-value" id="stat-stamina-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <img class="stat-icon" data-sprite="barn_stat_magic" src="assets/images/ui/barn_stat_magic.png" alt="魔法">
+                            <span class="stat-label">魔法</span>
+                            <div class="stat-bar-container">
+                                <div class="stat-bar magic" id="stat-magic"></div>
+                            </div>
+                            <span class="stat-value" id="stat-magic-value">0</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <button id="share-btn">分享再战</button>
-            <button id="restart-btn">重新开始</button>
+            
+            <div class="barn-actions">
+                <button class="barn-btn" data-sprite="barn_btn_save" onclick="Game.saveHorse()">
+                    <img src="assets/images/ui/barn_btn_save.png" alt="保存马匹">
+                </button>
+                <button class="barn-btn" data-sprite="barn_btn_sell" onclick="Game.sellHorse()">
+                    <img src="assets/images/ui/barn_btn_sell.png" alt="出售马匹">
+                </button>
+                <button class="barn-btn" data-sprite="barn_btn_shop" onclick="Game.switchScreen('shop')">
+                    <img src="assets/images/ui/barn_btn_shop.png" alt="前往商店">
+                </button>
+                <button class="barn-btn" data-sprite="barn_btn_race" onclick="Game.switchScreen('race')">
+                    <img src="assets/images/ui/barn_btn_race.png" alt="前往赛场">
+                </button>
+            </div>
         </div>
+
+        <!-- 部件选择弹窗 -->
+        <div class="modal-overlay hidden" id="part-selector-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-title">选择马头部件</h3>
+                    <button class="btn-close" onclick="Game.closePartSelector()">×</button>
+                </div>
+                
+                <div class="modal-tabs">
+                    <button class="modal-tab-btn active" data-category="all" onclick="PartSelector.filterCategory('all')">全部</button>
+                    <button class="modal-tab-btn" data-category="common" onclick="PartSelector.filterCategory('common')">
+                        <span class="category-dot common"></span>普通
+                    </button>
+                    <button class="modal-tab-btn" data-category="tech" onclick="PartSelector.filterCategory('tech')">
+                        <span class="category-dot tech"></span>科技
+                    </button>
+                    <button class="modal-tab-btn" data-category="magic" onclick="PartSelector.filterCategory('magic')">
+                        <span class="category-dot magic"></span>魔法
+                    </button>
+                </div>
+                
+                <div class="modal-body" id="modal-body">
+                    <div class="parts-grid" id="parts-grid">
+                    </div>
+                </div>
+                
+                <div class="modal-preview">
+                    <div class="preview-section">
+                        <h4>预览</h4>
+                        <div class="preview-icon" id="preview-icon">?</div>
+                    </div>
+                    <div class="compare-section">
+                        <h4>属性</h4>
+                        <div class="new-stats" id="new-stats">
+                            <div class="stat-item small">点击选择部件</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <div class="selected-info">
+                        <span class="selected-icon" id="selected-icon">?</span>
+                        <span class="selected-text">已选择: <span id="selected-name">-</span></span>
+                    </div>
+                    <div class="modal-buttons">
+                        <button class="btn btn-primary btn-large" onclick="Game.confirmEquip()">确认装备</button>
+                        <button class="btn btn-gray" onclick="Game.closePartSelector()">取消</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 商店界面 -->
+        <div id="shop-screen" class="screen landscape hidden">
+            <div class="screen-bg" data-sprite="shop_bg"></div>
+            
+            <div class="shop-header">
+                <div class="shop-title">
+                    <img data-sprite="shop_title_text" src="assets/images/ui/shop_title_text.png" alt="商店">
+                </div>
+                
+                <div class="shop-gold">
+                    <img data-sprite="shop_gold_icon" src="assets/images/ui/shop_gold_icon.png" alt="gold">
+                    <span class="shop-gold-label" data-sprite="shop_gold_label">马币:</span>
+                    <span class="shop-gold-value" id="shop-gold">6000</span>
+                </div>
+            </div>
+            
+            <div class="shop-tabs">
+                <button class="shop-tab active" data-type="head" onclick="Shop.filterType('head')">
+                    <img data-sprite="shop_tab_head" src="assets/images/ui/shop_tab_head.png" alt="头部">
+                </button>
+                <button class="shop-tab" data-type="body" onclick="Shop.filterType('body')">
+                    <img data-sprite="shop_tab_body" src="assets/images/ui/shop_tab_body.png" alt="身体">
+                </button>
+                <button class="shop-tab" data-type="legs" onclick="Shop.filterType('legs')">
+                    <img data-sprite="shop_tab_legs" src="assets/images/ui/shop_tab_legs.png" alt="腿部">
+                </button>
+                <button class="shop-tab" data-type="tail" onclick="Shop.filterType('tail')">
+                    <img data-sprite="shop_tab_tail" src="assets/images/ui/shop_tab_tail.png" alt="尾部">
+                </button>
+                <button class="shop-tab" data-type="special" onclick="Shop.filterType('special')">
+                    <img data-sprite="shop_tab_special" src="assets/images/ui/shop_tab_special.png" alt="特殊">
+                </button>
+            </div>
+            
+            <div class="shop-content">
+                <div class="shop-recommend">
+                    <div class="recommend-header">
+                        <img data-sprite="shop_recommend_title" src="assets/images/ui/shop_recommend_title.png" alt="特价推荐">
+                    </div>
+                    <div class="recommend-item">
+                        <img class="recommend-icon" data-sprite="shop_recommend_icon" src="assets/images/shop/shop_recommend_icon.png" alt="推荐商品">
+                        <div class="recommend-info">
+                            <span class="recommend-name" id="recommend-name">炫彩战马头盔</span>
+                            <div class="recommend-price">
+                                <img data-sprite="shop_gold_icon" src="assets/images/ui/shop_gold_icon.png" alt="gold">
+                                <span class="recommend-price-value" id="recommend-price">150</span>
+                                <span class="recommend-price-label">马币</span>
+                            </div>
+                        </div>
+                        <button class="recommend-btn" onclick="Shop.buyRecommend()">
+                            <img data-sprite="shop_btn_buy" src="assets/images/ui/shop_btn_buy.png" alt="购买">
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="shop-items-grid" id="shop-items">
+                </div>
+            </div>
+            
+            <div class="shop-actions">
+                <button class="shop-btn-back" onclick="Game.switchScreen('barn')">
+                    <img data-sprite="shop_btn_back" src="assets/images/ui/shop_btn_back.png" alt="返回">
+                </button>
+            </div>
+        </div>
+
+        <!-- 赛场界面 -->
+        <div id="race-screen" class="screen landscape hidden">
+            <div class="screen-bg" data-sprite="race_bg"></div>
+            
+            <div class="race-header">
+                <button class="race-btn-back" onclick="Game.switchScreen('barn')">
+                    <img data-sprite="race_btn_back" src="assets/images/ui/race_btn_back.png" alt="返回">
+                </button>
+                
+                <img class="race-title" data-sprite="race_title" src="assets/images/ui/race_title.png" alt="三局两胜赛马">
+                
+                <div class="race-gold">
+                    <img data-sprite="race_gold_icon" src="assets/images/ui/race_gold_icon.png" alt="gold">
+                    <span class="race-gold-label" data-sprite="race_gold_label">马币:</span>
+                    <span class="race-gold-value" id="race-gold">6000</span>
+                </div>
+            </div>
+            
+            <div class="race-prep" id="race-prep">
+                <div class="teams-container">
+                    <div class="team-panel player-team">
+                        <div class="team-header player-header">
+                            <img data-sprite="race_panel_title_player" src="assets/images/ui/race_panel_title_player.png" alt="我的马匹">
+                        </div>
+                        <div class="horse-cards" id="player-horses">
+                        </div>
+                    </div>
+                    
+                    <div class="vs-badge">
+                        <img data-sprite="race_vs" src="assets/images/ui/race_vs.png" alt="VS">
+                    </div>
+                    
+                    <div class="team-panel opponent-team">
+                        <div class="team-header opponent-header">
+                            <img data-sprite="race_panel_title_opponent" src="assets/images/ui/race_panel_title_opponent.png" alt="对手马匹">
+                        </div>
+                        <div class="horse-cards" id="opponent-horses">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="race-actions">
+                    <img class="race-flag-left" data-sprite="race_flag" src="assets/images/ui/race_flag.png" alt="flag">
+                    <button class="race-btn-start" onclick="Game.startRace()">
+                        <img data-sprite="race_btn_start" src="assets/images/ui/race_btn_start.png" alt="开始比赛">
+                    </button>
+                    <img class="race-flag-right" data-sprite="race_flag" src="assets/images/ui/race_flag.png" alt="flag">
+                </div>
+            </div>
+            
+            <div class="race-arena hidden" id="race-arena">
+                <div class="race-game-header">
+                    <div class="round-display">
+                        <img data-sprite="race_round_bg" src="assets/images/race/race_round_bg.png" alt="round bg">
+                        <div class="round-text" id="round-text">第1局</div>
+                    </div>
+                    
+                    <div class="score-display">
+                        <div class="score-side player-side">
+                            <img data-sprite="race_player_label" src="assets/images/race/race_player_label.png" alt="玩家">
+                            <div class="score-num player-score" id="game-player-score">0</div>
+                        </div>
+                        <img data-sprite="race_score_divider" src="assets/images/race/race_score_divider.png" alt=":">
+                        <div class="score-side opponent-side">
+                            <div class="score-num opponent-score" id="game-opponent-score">0</div>
+                            <img data-sprite="race_opponent_label" src="assets/images/race/race_opponent_label.png" alt="系统">
+                        </div>
+                    </div>
+                    
+                    <div class="progress-display">
+                        <img data-sprite="race_progress_bg" src="assets/images/race/race_progress_bg.png" alt="progress bg">
+                        <div class="progress-dots">
+                            <span class="progress-dot active" id="progress-dot-1"></span>
+                            <span class="progress-dot" id="progress-dot-2"></span>
+                            <span class="progress-dot" id="progress-dot-3"></span>
+                        </div>
+                        <img data-sprite="race_flag_small" src="assets/images/race/race_flag_small.png" alt="flag">
+                    </div>
+                </div>
+                
+                <div class="race-scene">
+                    <div class="scene-bg">
+                        <img data-sprite="race_scene_bg" src="assets/images/race/race_scene_bg.png" alt="scene bg">
+                    </div>
+                    
+                    <div class="track-container">
+                        <div class="track-lanes">
+                            <div class="lane player-lane">
+                                <div class="horse-container" id="player-horse-container">
+                                    <img class="player-horse" id="player-horse" data-sprite="race_horse_player" src="assets/images/race/race_horse_player.png" alt="player horse">
+                                </div>
+                            </div>
+                            <div class="lane opponent-lane">
+                                <div class="horse-container" id="opponent-horse-container">
+                                    <img class="opponent-horse" id="opponent-horse" data-sprite="race_horse_opponent_game" src="assets/images/race/race_horse_opponent_game.png" alt="opponent horse">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="race-bottom-panel">
+                    <div class="horse-info player-info">
+                        <div class="horse-head-icon">
+                            <img data-sprite="race_player_head" src="assets/images/race/race_player_head.png" alt="player head">
+                        </div>
+                        <div class="horse-name" id="game-player-horse-name">的卢</div>
+                        <div class="stamina-container">
+                            <span class="stamina-label">体力值</span>
+                            <div class="stamina-bar">
+                                <div class="stamina-fill player" id="player-stamina"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="horse-info opponent-info">
+                        <div class="horse-head-icon">
+                            <img data-sprite="race_opponent_head" src="assets/images/race/race_opponent_head.png" alt="opponent head">
+                        </div>
+                        <div class="horse-name" id="game-opponent-horse-name">爪黄飞电</div>
+                        <div class="stamina-container">
+                            <span class="stamina-label">体力值</span>
+                            <div class="stamina-bar">
+                                <div class="stamina-fill opponent" id="opponent-stamina"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 胜利界面 -->
+        <div id="victory-screen" class="screen landscape hidden">
+            <div class="screen-bg victory-bg">
+                <div class="trophy-icon">🏆</div>
+            </div>
+            <div class="confetti-particles">
+                <span class="confetti">★</span>
+                <span class="confetti">☆</span>
+                <span class="confetti">✦</span>
+                <span class="confetti">●</span>
+                <span class="confetti">■</span>
+                <span class="confetti">▲</span>
+                <span class="confetti">◆</span>
+                <span class="confetti">✧</span>
+            </div>
+            
+            <div class="result-content">
+                <div class="result-badge victory">
+                    <span class="badge-icon">🎉</span>
+                </div>
+                <h1 class="result-title victory">胜利!</h1>
+                
+                <div class="result-score">
+                    <div class="score-box player">
+                        <span class="score-label">玩家</span>
+                        <span class="score-value">2</span>
+                    </div>
+                    <span class="score-colon">:</span>
+                    <div class="score-box opponent">
+                        <span class="score-label">系统</span>
+                        <span class="score-value">1</span>
+                    </div>
+                </div>
+                
+                <div class="rounds-summary">
+                    <div class="round-item won">
+                        <span class="round-num">第1局</span>
+                        <span class="round-icon">✓</span>
+                    </div>
+                    <div class="round-item lost">
+                        <span class="round-num">第2局</span>
+                        <span class="round-icon">✗</span>
+                    </div>
+                    <div class="round-item won">
+                        <span class="round-num">第3局</span>
+                        <span class="round-icon">✓</span>
+                    </div>
+                </div>
+                
+                <div class="reward-panel victory">
+                    <span class="reward-icon">🪙</span>
+                    <span class="reward-value">+150</span>
+                    <span class="reward-label">马币奖励</span>
+                    <span class="current-gold">当前马币: <span id="victory-gold">6000</span></span>
+                </div>
+                
+                <div class="result-actions">
+                    <button class="btn btn-white" onclick="Game.switchScreen('main')">返回主界面</button>
+                    <button class="btn btn-primary" onclick="Game.startRace()">再次挑战</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 失败界面 -->
+        <div id="defeat-screen" class="screen landscape hidden">
+            <div class="screen-bg defeat-bg">
+                <div class="cloud-icon">☁️</div>
+            </div>
+            <div class="rain-particles">
+                <span class="raindrop">|</span>
+                <span class="raindrop">||</span>
+                <span class="raindrop">|</span>
+                <span class="raindrop">||</span>
+                <span class="raindrop">|</span>
+                <span class="raindrop">||</span>
+            </div>
+            
+            <div class="result-content">
+                <div class="result-badge defeat">
+                    <span class="badge-icon">😢</span>
+                </div>
+                <h1 class="result-title defeat">失败</h1>
+                
+                <div class="result-score">
+                    <div class="score-box player">
+                        <span class="score-label">玩家</span>
+                        <span class="score-value">0</span>
+                    </div>
+                    <span class="score-colon">:</span>
+                    <div class="score-box opponent">
+                        <span class="score-label">系统</span>
+                        <span class="score-value">2</span>
+                    </div>
+                </div>
+                
+                <div class="rounds-summary">
+                    <div class="round-item lost">
+                        <span class="round-num">第1局</span>
+                        <span class="round-icon">✗</span>
+                    </div>
+                    <div class="round-item lost">
+                        <span class="round-num">第2局</span>
+                        <span class="round-icon">✗</span>
+                    </div>
+                    <div class="round-item pending">
+                        <span class="round-num">第3局</span>
+                        <span class="round-icon">-</span>
+                    </div>
+                </div>
+                
+                <div class="reward-panel defeat">
+                    <span class="reward-icon">💸</span>
+                    <span class="reward-value">-50</span>
+                    <span class="reward-label">参赛费用</span>
+                    <span class="current-gold">当前马币: <span id="defeat-gold">6000</span></span>
+                    <span class="hint-text">马币不足时可出售马匹</span>
+                </div>
+                
+                <div class="encouragement">
+                    <span class="heart-icon">♡</span>
+                    <span>胜败乃兵家常事</span>
+                    <span class="heart-icon">♡</span>
+                </div>
+                
+                <div class="result-actions">
+                    <button class="btn btn-white" onclick="Game.switchScreen('main')">返回主界面</button>
+                    <button class="btn btn-warning" onclick="Game.startRace()">再次挑战</button>
+                    <button class="btn btn-secondary" onclick="Game.switchScreen('barn')">前往养马屋</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 通知提示 -->
+        <div class="notification-container" id="notifications"></div>
     </div>
 
+    <script src="assets/sprite_loader.js"></script>
     <script src="game.js"></script>
 </body>
 </html>

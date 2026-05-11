@@ -1,814 +1,783 @@
-const canvas = document.getElementById('game-canvas');
-const ctx = canvas.getContext('2d');
-
-// 游戏配置 - 可替换贴图的配置项
-const CONFIG = {
-    colors: {
-        red: '#e94560',
-        blue: '#4ecdc4',
-        yellow: '#ffe66d',
-        green: '#95e1a3',
-        background: '#16213e',
-        conveyor: '#0f3460',
-        shelf: '#1a1a2e',
-        shelfBorder: '#e94560'
-    },
-    itemTypes: [
-        { name: 'red', color: '#e94560', image: 'assets/items/red.png' },
-        { name: 'blue', color: '#4ecdc4', image: 'assets/items/blue.png' },
-        { name: 'yellow', color: '#ffe66d', image: 'assets/items/yellow.png' },
-        { name: 'green', color: '#95e1a3', image: 'assets/items/green.png' },
-        { name: 'bomb', color: '#ff3333', image: 'assets/items/bomb.png' }
-    ],
-    shelfTypes: {
-        red: { color: '#e94560', image: 'assets/shelves/red.png' },
-        blue: { color: '#4ecdc4', image: 'assets/shelves/blue.png' },
-        yellow: { color: '#ffe66d', image: 'assets/shelves/yellow.png' },
-        green: { color: '#95e1a3', image: 'assets/shelves/green.png' },
-        bomb: { color: '#ff3333', image: 'assets/shelves/bomb.png' }
-    },
-    images: {
-        background: 'assets/background.png',
-        conveyor: 'assets/conveyor.png'
-    },
-    maxHealth: 10,
-    baseConveyorSpeed: 1.0,
-    speedIncreaseRate: 0.0005,
-    itemSize: 60,
-    shelfWidth: 90,
-    shelfHeight: 80
-};
-
-// 图片资源管理
-const ImageManager = {
-    loaded: {},
-    loading: false,
-    loadImage(src) {
-        return new Promise((resolve) => {
-            if (this.loaded[src]) {
-                resolve(this.loaded[src]);
-                return;
-            }
-            const img = new Image();
-            img.onload = () => {
-                this.loaded[src] = img;
-                resolve(img);
-            };
-            img.onerror = () => {
-                this.loaded[src] = null;
-                resolve(null);
-            };
-            img.src = src;
-        });
-    },
-    getImage(src) {
-        return this.loaded[src] || null;
-    }
-};
-
-// 游戏状态
-let gameState = {
-    running: false,
-    score: 0,
-    health: CONFIG.maxHealth,
-    conveyorSpeed: CONFIG.baseConveyorSpeed,
-    items: [],
-    thrownItems: [],
-    shelves: [],
-    lastItemTime: 0,
-    itemSpawnInterval: 1500,
-    touchStart: null,
-    selectedItem: null,
-    effects: []
-};
-
-// 排行榜数据
-let leaderboardData = [
-    { name: '小明', score: 350 },
-    { name: '小红', score: 280 },
-    { name: '小刚', score: 220 },
-    { name: '小美', score: 180 },
-    { name: '小李', score: 120 }
+const SHOP_ITEMS = [
+    { id: 'head_round', type: 'head', category: 'common', name: '圆形头盔', icon: '🔵', price: 80, stats: { speed: 60, power: 50 } },
+    { id: 'head_triangle', type: 'head', category: 'common', name: '三角头盔', icon: '🔺', price: 60, stats: { speed: 55, power: 45 } },
+    { id: 'head_square', type: 'head', category: 'common', name: '方形头盔', icon: '🟦', price: 70, stats: { speed: 58, power: 48 } },
+    { id: 'head_diamond', type: 'head', category: 'magic', name: '菱形头盔', icon: '💎', price: 90, stats: { speed: 65, magic: 30 } },
+    { id: 'head_rainbow_helmet', type: 'head', category: 'magic', name: '炫彩战马头盔', icon: '🌈', price: 150, stats: { speed: 80, power: 50, magic: 40 } },
+    
+    { id: 'body_cross', type: 'body', category: 'tech', name: '十字躯甲', icon: '➕', price: 120, stats: { stamina: 70, tech: 35 } },
+    { id: 'body_warrior', type: 'body', category: 'common', name: '勇士护甲', icon: '🛡️', price: 110, stats: { stamina: 75, power: 40 } },
+    
+    { id: 'legs_wind', type: 'legs', category: 'tech', name: '疾风腿甲', icon: '🌪️', price: 90, stats: { speed: 70, tech: 25 } },
+    
+    { id: 'tail_shine', type: 'tail', category: 'magic', name: '流光尾翼', icon: '✨', price: 130, stats: { stamina: 60, magic: 35 } },
+    
+    { id: 'special_crown', type: 'special', category: 'magic', name: '魔法皇冠', icon: '👑', price: 200, stats: { magic: 50 } }
 ];
 
-// 初始化画布大小
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    initShelves();
-}
+const HORSE_NAMES = ['的卢', '赤兔', '绝影'];
 
-// 初始化货架
-function initShelves() {
-    const spacing = 20;
-    const shelfWidth = CONFIG.shelfWidth;
-    const shelfHeight = CONFIG.shelfHeight;
-    const shelfGap = 50; // 缩小货架间距
-    
-    gameState.shelves = [];
-    
-    // 第1层（最上方）：中间炸弹货架（0分）
-    gameState.shelves.push({
-        x: canvas.width / 2 - shelfWidth / 2,
-        y: 40,
-        width: shelfWidth,
-        height: shelfHeight,
-        type: 'bomb',
-        color: CONFIG.itemTypes[4].color,
-        score: 0
-    });
-    
-    // 第2层：左蓝、右绿（3分）
-    const layer2Y = 140;
-    gameState.shelves.push({
-        x: spacing,
-        y: layer2Y,
-        width: shelfWidth,
-        height: shelfHeight,
-        type: 'blue',
-        color: CONFIG.itemTypes[1].color,
-        score: 3
-    });
-    
-    gameState.shelves.push({
-        x: canvas.width - shelfWidth - spacing,
-        y: layer2Y,
-        width: shelfWidth,
-        height: shelfHeight,
-        type: 'green',
-        color: CONFIG.itemTypes[3].color,
-        score: 3
-    });
-    
-    // 第3层：左红、右黄（2分）
-    const layer3Y = layer2Y + shelfHeight + shelfGap;
-    gameState.shelves.push({
-        x: spacing,
-        y: layer3Y,
-        width: shelfWidth,
-        height: shelfHeight,
-        type: 'red',
-        color: CONFIG.itemTypes[0].color,
-        score: 2
-    });
-    
-    gameState.shelves.push({
-        x: canvas.width - shelfWidth - spacing,
-        y: layer3Y,
-        width: shelfWidth,
-        height: shelfHeight,
-        type: 'yellow',
-        color: CONFIG.itemTypes[2].color,
-        score: 2
-    });
-    
-    // 第4层：左红、右黄（1分）
-    const layer4Y = layer3Y + shelfHeight + shelfGap;
-    gameState.shelves.push({
-        x: spacing,
-        y: layer4Y,
-        width: shelfWidth,
-        height: shelfHeight,
-        type: 'red',
-        color: CONFIG.itemTypes[0].color,
-        score: 1
-    });
-    
-    gameState.shelves.push({
-        x: canvas.width - shelfWidth - spacing,
-        y: layer4Y,
-        width: shelfWidth,
-        height: shelfHeight,
-        type: 'yellow',
-        color: CONFIG.itemTypes[2].color,
-        score: 1
-    });
-}
+const CONFIG = {
+    INITIAL_GOLD: 6000,
+    RACE_FEE: 50,
+    WIN_REWARD: 150,
+    SELL_RATE: 0.7
+};
 
-// 生成新货物
-function spawnItem() {
-    const type = CONFIG.itemTypes[Math.floor(Math.random() * CONFIG.itemTypes.length)];
-    const item = {
-        x: -CONFIG.itemSize,
-        y: canvas.height - 120, // 货物位置上移
-        width: CONFIG.itemSize,
-        height: CONFIG.itemSize,
-        type: type.name,
-        color: type.color,
-        vx: 0,
-        vy: 0,
-        onConveyor: true,
-        selected: false
-    };
-    gameState.items.push(item);
-}
+let GameState = {
+    gold: CONFIG.INITIAL_GOLD,
+    inventory: [],
+    horses: [
+        { id: 0, name: '的卢', parts: { head: null, body: null, legs: null, tail: null, special: null }, stats: { speed: 0, power: 0, stamina: 0, magic: 0, tech: 0 } },
+        { id: 1, name: '赤兔', parts: { head: null, body: null, legs: null, tail: null, special: null }, stats: { speed: 0, power: 0, stamina: 0, magic: 0, tech: 0 } },
+        { id: 2, name: '绝影', parts: { head: null, body: null, legs: null, tail: null, special: null }, stats: { speed: 0, power: 0, stamina: 0, magic: 0, tech: 0 } }
+    ],
+    currentHorse: 0,
+    totalRaces: 0,
+    wins: 0,
+    losses: 0,
+    partSelectorType: null,
+    selectedPart: null,
+    raceData: null
+};
 
-// 绘制游戏
-function draw() {
-    // 绘制背景（优先使用图片，没有则用色块）
-    const bgImage = ImageManager.getImage(CONFIG.images.background);
-    if (bgImage) {
-        ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
-    } else {
-        ctx.fillStyle = CONFIG.colors.background;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
+const Game = {
+    init() {
+        this.loadGame();
+        this.updateUI();
+        this.setupEventListeners();
+    },
     
-    drawShelves();
-    drawConveyor();
-    drawItems();
-    drawThrownItems();
-    drawEffects();
-    
-    if (gameState.touchStart && gameState.selectedItem) {
-        drawSwipeLine();
-    }
-}
-
-// 绘制图片或色块的通用函数
-function drawImageOrRect(x, y, width, height, imageSrc, fallbackColor, drawBorder = false) {
-    const img = ImageManager.getImage(imageSrc);
-    if (img) {
-        ctx.drawImage(img, x, y, width, height);
-    } else {
-        ctx.fillStyle = fallbackColor;
-        ctx.fillRect(x, y, width, height);
-        if (drawBorder) {
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 3;
-            ctx.strokeRect(x, y, width, height);
-        }
-    }
-}
-
-// 绘制特效
-function drawEffects() {
-    if (!gameState.effects) {
-        gameState.effects = [];
-        return;
-    }
-    for (let i = gameState.effects.length - 1; i >= 0; i--) {
-        const effect = gameState.effects[i];
-        effect.life -= 1;
-        
-        if (effect.life <= 0) {
-            gameState.effects.splice(i, 1);
-            continue;
-        }
-        
-        const alpha = effect.life / effect.maxLife;
-        
-        if (effect.type === 'score') {
-            // 分数文字上浮特效
-            ctx.globalAlpha = alpha;
-            ctx.fillStyle = effect.color;
-            ctx.font = 'bold 32px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText(`+${effect.score}`, effect.x, effect.y - (effect.maxLife - effect.life) * 2);
-            ctx.globalAlpha = 1;
-        } else if (effect.type === 'explosion') {
-            // 爆炸特效
-            const radius = (1 - alpha) * 60;
-            ctx.globalAlpha = alpha * 0.5;
-            ctx.fillStyle = effect.color;
-            ctx.beginPath();
-            ctx.arc(effect.x, effect.y, radius, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.globalAlpha = 1;
-            
-            // 火花粒子
-            for (let j = 0; j < 8; j++) {
-                const angle = (j / 8) * Math.PI * 2;
-                const particleDistance = (1 - alpha) * 50;
-                const px = effect.x + Math.cos(angle) * particleDistance;
-                const py = effect.y + Math.sin(angle) * particleDistance;
-                const particleRadius = 3 * alpha;
-                
-                ctx.globalAlpha = alpha;
-                ctx.fillStyle = effect.color;
-                ctx.beginPath();
-                ctx.arc(px, py, particleRadius, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.globalAlpha = 1;
+    loadGame() {
+        const saved = localStorage.getItem('tianji_horse_save');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                GameState.gold = data.gold || CONFIG.INITIAL_GOLD;
+                GameState.inventory = data.inventory || [];
+                GameState.horses = data.horses || GameState.horses;
+                GameState.totalRaces = data.totalRaces || 0;
+                GameState.wins = data.wins || 0;
+                GameState.losses = data.losses || 0;
+            } catch (e) {
+                console.error('Failed to load save:', e);
             }
         }
-    }
-}
-
-// 添加得分特效
-function addScoreEffect(x, y, score, color) {
-    gameState.effects.push({
-        type: 'score',
-        x: x,
-        y: y,
-        score: score,
-        color: color,
-        life: 60,
-        maxLife: 60
-    });
+    },
     
-    if (score >= 30) {
-        // 30分添加爆炸特效
-        gameState.effects.push({
-            type: 'explosion',
-            x: x,
-            y: y,
-            color: color,
-            life: 40,
-            maxLife: 40
+    saveGame() {
+        const data = {
+            gold: GameState.gold,
+            inventory: GameState.inventory,
+            horses: GameState.horses,
+            totalRaces: GameState.totalRaces,
+            wins: GameState.wins,
+            losses: GameState.losses
+        };
+        localStorage.setItem('tianji_horse_save', JSON.stringify(data));
+    },
+    
+    updateUI() {
+        document.querySelectorAll('.gold-amount, #barn-gold, #shop-gold, #race-gold, #victory-gold, #defeat-gold').forEach(el => {
+            el.textContent = GameState.gold;
+        });
+        
+        const totalRacesEl = document.getElementById('total-races');
+        if (totalRacesEl) {
+            totalRacesEl.textContent = GameState.totalRaces;
+        }
+        const winRateEl = document.getElementById('win-rate');
+        if (winRateEl) {
+            const winRate = GameState.totalRaces > 0 ? Math.round((GameState.wins / GameState.totalRaces) * 100) : 0;
+            winRateEl.textContent = winRate + '%';
+        }
+        
+        this.updateHorseStats();
+        this.updateHorseCards();
+        this.updatePreview();
+        this.updateInventoryCounts();
+    },
+    
+    switchScreen(screenName) {
+        document.querySelectorAll('.screen').forEach(screen => {
+            screen.classList.add('hidden');
+        });
+        
+        document.getElementById(screenName + '-screen').classList.remove('hidden');
+        
+        if (screenName === 'shop') {
+            Shop.init();
+        }
+        
+        if (screenName === 'race') {
+            this.renderRacePrep();
+        }
+    },
+    
+    selectHorseTab(index) {
+        GameState.currentHorse = index;
+        document.querySelectorAll('.barn-tab').forEach((btn, i) => {
+            btn.classList.toggle('active', i === index);
+        });
+        this.updateHorseStats();
+        this.updatePreview();
+    },
+    
+    updateHorseStats() {
+        const horse = GameState.horses[GameState.currentHorse];
+        const stats = horse.stats;
+        
+        const statBarSpeed = document.getElementById('stat-speed');
+        const statBarPower = document.getElementById('stat-power');
+        const statBarStamina = document.getElementById('stat-stamina');
+        const statBarMagic = document.getElementById('stat-magic');
+        
+        const statValueSpeed = document.getElementById('stat-speed-value');
+        const statValuePower = document.getElementById('stat-power-value');
+        const statValueStamina = document.getElementById('stat-stamina-value');
+        const statValueMagic = document.getElementById('stat-magic-value');
+        
+        if (statBarSpeed) statBarSpeed.style.width = Math.min(stats.speed || 0, 100) + '%';
+        if (statBarPower) statBarPower.style.width = Math.min(stats.power || 0, 100) + '%';
+        if (statBarStamina) statBarStamina.style.width = Math.min(stats.stamina || 0, 100) + '%';
+        if (statBarMagic) statBarMagic.style.width = Math.min(stats.magic || 0, 100) + '%';
+        
+        if (statValueSpeed) statValueSpeed.textContent = stats.speed || 0;
+        if (statValuePower) statValuePower.textContent = stats.power || 0;
+        if (statValueStamina) statValueStamina.textContent = stats.stamina || 0;
+        if (statValueMagic) statValueMagic.textContent = stats.magic || 0;
+    },
+    
+    updateHorseCards() {
+        const container = document.getElementById('player-horses');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        GameState.horses.forEach((horse, index) => {
+            const card = document.createElement('div');
+            card.className = 'horse-card';
+            
+            const hasParts = horse.parts.head || horse.parts.body || horse.parts.legs || horse.parts.tail;
+            const horseIcon = hasParts ? '🐴' : '❓';
+            const colors = ['#4ECDC4', '#FF6B6B', '#FFE66D'];
+            
+            card.innerHTML = `
+                <div class="horse-card-number" style="background: ${colors[index]}">${index + 1}</div>
+                <div class="horse-card-icon">${horseIcon}</div>
+                <div class="horse-card-info">
+                    <div class="horse-card-name">${horse.name}</div>
+                    <div class="horse-card-stats">
+                        <span class="stat-dot speed"></span>
+                        <span class="stat-dot power"></span>
+                        <span class="stat-dot stamina"></span>
+                        <span class="stat-dot magic"></span>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    },
+    
+    updatePreview() {
+        const horse = GameState.horses[GameState.currentHorse];
+        
+        const horseNameEl = document.getElementById('current-horse-name');
+        if (horseNameEl) {
+            horseNameEl.textContent = horse.name;
+        }
+        
+        const partTypes = ['head', 'body', 'legs', 'tail', 'special', 'headdress'];
+        partTypes.forEach(partType => {
+            const slotEl = document.querySelector(`.part-slot[data-type="${partType}"] .slot-icon`);
+            if (slotEl) {
+                if (horse.parts[partType]) {
+                    slotEl.src = this.getPartSpritePath(horse.parts[partType].type, horse.parts[partType].category);
+                    slotEl.style.display = 'block';
+                } else {
+                    slotEl.src = `assets/images/ui/barn_slot_${partType}.png`;
+                    slotEl.style.display = 'block';
+                }
+            }
+        });
+        
+        const assembledHorseEl = document.getElementById('assembled-horse');
+        if (assembledHorseEl) {
+            const hasParts = horse.parts.head || horse.parts.body || horse.parts.legs || horse.parts.tail;
+            if (hasParts) {
+                assembledHorseEl.src = this.getAssembledHorseSprite(horse);
+            } else {
+                assembledHorseEl.src = 'assets/images/characters/barn_horse_default.png';
+            }
+        }
+    },
+    
+    getPartSpritePath(type, category) {
+        const basePath = 'assets/images/parts/';
+        const paths = {
+            head: { common: 'barn_part_head.png', tech: 'barn_part_head.png', magic: 'barn_part_head.png' },
+            body: { common: 'barn_part_body.png', tech: 'barn_part_body.png', magic: 'barn_part_body.png' },
+            legs: { common: 'barn_part_legs.png', tech: 'barn_part_legs.png', magic: 'barn_part_legs.png' },
+            tail: { common: 'barn_part_tail.png', tech: 'barn_part_tail.png', magic: 'barn_part_tail.png' },
+            special: { common: 'barn_part_headdress.png', tech: 'barn_part_headdress.png', magic: 'barn_part_headdress.png' },
+            extra: { common: 'barn_part_extra.png', tech: 'barn_part_extra.png', magic: 'barn_part_extra.png' }
+        };
+        return basePath + (paths[type] && paths[type][category] ? paths[type][category] : `barn_part_${type}.png`);
+    },
+    
+    getAssembledHorseSprite(horse) {
+        const parts = horse.parts;
+        const hasHead = parts.head;
+        const hasBody = parts.body;
+        const hasLegs = parts.legs;
+        const hasTail = parts.tail;
+        
+        if (hasHead && hasBody && hasLegs && hasTail) {
+            const headCat = parts.head.category;
+            const bodyCat = parts.body.category;
+            const legsCat = parts.legs.category;
+            const tailCat = parts.tail.category;
+            
+            const dominantCat = headCat || bodyCat || legsCat || tailCat || 'common';
+            return `assets/images/characters/barn_horse_${dominantCat}.png`;
+        }
+        
+        return 'assets/images/characters/barn_horse_default.png';
+    },
+    
+    updateInventoryCounts() {
+        const types = ['head', 'body', 'legs', 'tail', 'special'];
+        types.forEach(type => {
+            const count = GameState.inventory.filter(item => item.type === type).length;
+            const el = document.getElementById('count-' + type);
+            if (el) {
+                el.textContent = count;
+            }
+        });
+    },
+    
+    openPartSelector(type) {
+        GameState.partSelectorType = type;
+        document.getElementById('part-selector-modal').classList.remove('hidden');
+        document.getElementById('modal-title').textContent = `选择${this.getPartTypeName(type)}部件`;
+        PartSelector.renderParts(type);
+    },
+    
+    getPartTypeName(type) {
+        const names = { head: '马头', body: '马身', legs: '马腿', tail: '马尾', special: '头饰', extra: '特殊' };
+        return names[type] || type;
+    },
+    
+    closePartSelector() {
+        document.getElementById('part-selector-modal').classList.add('hidden');
+        GameState.partSelectorType = null;
+        GameState.selectedPart = null;
+    },
+    
+    selectPartForEquip(part) {
+        GameState.selectedPart = part;
+        document.getElementById('preview-icon').textContent = part.icon;
+        document.getElementById('selected-icon').textContent = part.icon;
+        document.getElementById('selected-name').textContent = part.category + '-' + part.name;
+        
+        const statHtml = [];
+        if (part.stats.speed) statHtml.push(`速度 +${part.stats.speed}`);
+        if (part.stats.power) statHtml.push(`力量 +${part.stats.power}`);
+        if (part.stats.stamina) statHtml.push(`耐力 +${part.stats.stamina}`);
+        if (part.stats.magic) statHtml.push(`魔力 +${part.stats.magic}`);
+        if (part.stats.tech) statHtml.push(`科技 +${part.stats.tech}`);
+        
+        document.getElementById('new-stats').innerHTML = statHtml.map(s => `<div class="stat-item small">${s}</div>`).join('');
+    },
+    
+    confirmEquip() {
+        if (!GameState.selectedPart) return;
+        
+        const part = GameState.selectedPart;
+        const horse = GameState.horses[GameState.currentHorse];
+        
+        const invIndex = GameState.inventory.findIndex(p => 
+            p.id === part.id
+        );
+        
+        if (invIndex === -1) {
+            this.showNotification('未拥有该部件', 'error');
+            return;
+        }
+        
+        GameState.inventory.splice(invIndex, 1);
+        horse.parts[part.type] = part;
+        
+        this.recalculateHorseStats(horse);
+        this.saveGame();
+        this.updateUI();
+        this.closePartSelector();
+        this.showNotification('装备成功!', 'success');
+    },
+    
+    recalculateHorseStats(horse) {
+        horse.stats = { speed: 0, power: 0, stamina: 0, magic: 0, tech: 0 };
+        
+        Object.values(horse.parts).forEach(part => {
+            if (part && part.stats) {
+                Object.entries(part.stats).forEach(([key, value]) => {
+                    if (horse.stats[key] !== undefined) {
+                        horse.stats[key] += value;
+                    }
+                });
+            }
+        });
+    },
+    
+    saveHorse() {
+        const horse = GameState.horses[GameState.currentHorse];
+        const hasParts = horse.parts.head && horse.parts.body && horse.parts.legs && horse.parts.tail;
+        
+        if (!hasParts) {
+            this.showNotification('请先装备完整的部件', 'warning');
+            return;
+        }
+        
+        this.saveGame();
+        this.showNotification('马匹已保存!', 'success');
+    },
+    
+    sellHorse() {
+        const horse = GameState.horses[GameState.currentHorse];
+        const hasParts = horse.parts.head || horse.parts.body || horse.parts.legs || horse.parts.tail || horse.parts.special;
+        
+        if (!hasParts) {
+            this.showNotification('没有可出售的部件', 'warning');
+            return;
+        }
+        
+        let totalValue = 0;
+        Object.values(horse.parts).forEach(part => {
+            if (part) {
+                totalValue += part.price;
+            }
+        });
+        
+        const sellValue = Math.round(totalValue * CONFIG.SELL_RATE);
+        GameState.gold += sellValue;
+        
+        horse.parts = { head: null, body: null, legs: null, tail: null, special: null };
+        horse.stats = { speed: 0, power: 0, stamina: 0, magic: 0, tech: 0 };
+        
+        this.saveGame();
+        this.updateUI();
+        this.showNotification(`出售成功! 获得 ${sellValue} 马币`, 'success');
+    },
+    
+    renderRacePrep() {
+        const playerContainer = document.getElementById('player-horses');
+        const opponentContainer = document.getElementById('opponent-horses');
+        
+        playerContainer.innerHTML = '';
+        GameState.horses.forEach((horse, index) => {
+            const card = document.createElement('div');
+            card.className = 'horse-card';
+            
+            const hasParts = horse.parts.head || horse.parts.body || horse.parts.legs || horse.parts.tail;
+            const horseSprite = hasParts ? `race_horse_player_${index + 1}` : 'race_horse_player_1';
+            
+            card.innerHTML = `
+                <div class="horse-card-number">
+                    <img src="assets/images/ui/race_player_num_${index + 1}.png" alt="${index + 1}" data-sprite="race_player_num_${index + 1}">
+                </div>
+                <div class="horse-card-icon">
+                    <img src="assets/images/race/${horseSprite}.png" alt="${horse.name}" data-sprite="${horseSprite}">
+                </div>
+                <div class="horse-card-info">
+                    <div class="horse-card-name">${horse.name}</div>
+                    <div class="horse-card-stats">
+                        <span class="stat-dot speed"></span>
+                        <span class="stat-dot power"></span>
+                        <span class="stat-dot stamina"></span>
+                        <span class="stat-dot magic"></span>
+                    </div>
+                </div>
+            `;
+            playerContainer.appendChild(card);
+        });
+        
+        opponentContainer.innerHTML = '';
+        for (let i = 0; i < 3; i++) {
+            const card = document.createElement('div');
+            card.className = 'horse-card';
+            card.innerHTML = `
+                <div class="horse-card-number">
+                    <img src="assets/images/ui/race_opponent_num_${i + 1}.png" alt="${i + 1}" data-sprite="race_opponent_num_${i + 1}">
+                </div>
+                <div class="horse-card-icon">
+                    <img src="assets/images/race/race_horse_opponent.png" alt="opponent" data-sprite="race_horse_opponent">
+                </div>
+                <div class="horse-card-info">
+                    <div class="horse-card-name">????</div>
+                    <div class="horse-card-stats">
+                        <span class="stat-dot" style="background: #666"></span>
+                        <span class="stat-dot" style="background: #666"></span>
+                        <span class="stat-dot" style="background: #666"></span>
+                        <span class="stat-dot" style="background: #666"></span>
+                    </div>
+                </div>
+            `;
+            opponentContainer.appendChild(card);
+        }
+    },
+    
+    startRace() {
+        const validHorses = GameState.horses.filter(h => 
+            h.parts.head && h.parts.body && h.parts.legs && h.parts.tail
+        );
+        
+        if (validHorses.length === 0) {
+            this.showNotification('请先在养马屋组装马匹', 'warning');
+            return;
+        }
+        
+        if (GameState.gold < CONFIG.RACE_FEE) {
+            this.showNotification('马币不足', 'error');
+            return;
+        }
+        
+        GameState.gold -= CONFIG.RACE_FEE;
+        
+        GameState.raceData = {
+            playerHorses: validHorses.slice(0, 3),
+            opponentHorses: this.generateOpponentHorses(),
+            currentRound: 0,
+            playerScore: 0,
+            opponentScore: 0,
+            roundResults: []
+        };
+        
+        document.getElementById('race-prep').classList.add('hidden');
+        document.getElementById('race-arena').classList.remove('hidden');
+        
+        this.updateRaceUI(0);
+        this.runRaceRound();
+    },
+    
+    generateOpponentHorses() {
+        const horses = [];
+        const names = ['爪黄飞电', '乌骓', '追风'];
+        
+        for (let i = 0; i < 3; i++) {
+            const speed = 60 + Math.floor(Math.random() * 40);
+            const power = 50 + Math.floor(Math.random() * 30);
+            const stamina = 50 + Math.floor(Math.random() * 30);
+            const magic = 30 + Math.floor(Math.random() * 30);
+            
+            horses.push({
+                name: names[i],
+                stats: { speed, power, stamina, magic, tech: 0 }
+            });
+        }
+        
+        return horses;
+    },
+    
+    updateRaceUI(round) {
+        const data = GameState.raceData;
+        if (!data) return;
+        
+        const roundText = document.getElementById('round-text');
+        const playerScore = document.getElementById('game-player-score');
+        const opponentScore = document.getElementById('game-opponent-score');
+        
+        if (roundText) roundText.textContent = `第${round + 1}局`;
+        if (playerScore) playerScore.textContent = data.playerScore;
+        if (opponentScore) opponentScore.textContent = data.opponentScore;
+        
+        for (let i = 0; i < 3; i++) {
+            const dot = document.getElementById(`progress-dot-${i + 1}`);
+            if (dot) {
+                dot.classList.toggle('active', i <= round);
+            }
+        }
+        
+        const playerHorse = data.playerHorses[round] || data.playerHorses[0];
+        const opponentHorse = data.opponentHorses[round];
+        
+        const playerHorseName = document.getElementById('game-player-horse-name');
+        const opponentHorseName = document.getElementById('game-opponent-horse-name');
+        if (playerHorseName) playerHorseName.textContent = playerHorse.name;
+        if (opponentHorseName) opponentHorseName.textContent = opponentHorse.name;
+        
+        this.updateHorseDisplay(playerHorse, 'player');
+    },
+    
+    updateHorseDisplay(horse, type) {
+        const horseImg = document.getElementById(type === 'player' ? 'player-horse' : 'opponent-horse');
+        if (!horseImg) return;
+        
+        const horseIndex = GameState.horses.findIndex(h => h === horse);
+        if (horseIndex >= 0) {
+            const spriteKey = `race_horse_player_${horseIndex + 1}`;
+            horseImg.src = `assets/images/race/${spriteKey}.png`;
+            horseImg.dataset.sprite = spriteKey;
+        }
+    },
+    
+    runRaceRound() {
+        const data = GameState.raceData;
+        if (!data) return;
+        
+        const round = data.currentRound;
+        const playerHorse = data.playerHorses[round] || data.playerHorses[0];
+        const opponentHorse = data.opponentHorses[round];
+        
+        this.updateRaceUI(round);
+        
+        const playerProgress = document.getElementById('player-stamina');
+        const opponentProgress = document.getElementById('opponent-stamina');
+        if (playerProgress) playerProgress.style.width = '100%';
+        if (opponentProgress) opponentProgress.style.width = '100%';
+        
+        let playerPos = 0;
+        let opponentPos = 0;
+        const playerHorseContainer = document.getElementById('player-horse-container');
+        const opponentHorseContainer = document.getElementById('opponent-horse-container');
+        if (playerHorseContainer) playerHorseContainer.style.left = '0';
+        if (opponentHorseContainer) opponentHorseContainer.style.left = '0';
+        
+        const raceInterval = setInterval(() => {
+            const playerSpeed = this.calculateSpeed(playerHorse.stats);
+            const opponentSpeed = this.calculateSpeed(opponentHorse.stats);
+            
+            playerPos += playerSpeed * 0.5;
+            opponentPos += opponentSpeed * 0.5;
+            
+            const maxPos = 85;
+            playerPos = Math.min(playerPos, maxPos);
+            opponentPos = Math.min(opponentPos, maxPos);
+            
+            if (playerHorseContainer) playerHorseContainer.style.left = playerPos + '%';
+            if (opponentHorseContainer) opponentHorseContainer.style.left = opponentPos + '%';
+            
+            if (playerProgress) playerProgress.style.width = Math.max(0, 100 - playerPos) + '%';
+            if (opponentProgress) opponentProgress.style.width = Math.max(0, 100 - opponentPos) + '%';
+            
+            if (playerPos >= maxPos || opponentPos >= maxPos) {
+                clearInterval(raceInterval);
+                
+                const winner = playerPos >= maxPos && opponentPos < maxPos ? 'player' : 
+                              opponentPos >= maxPos && playerPos < maxPos ? 'opponent' : 'draw';
+                
+                if (winner === 'player') data.playerScore++;
+                else if (winner === 'opponent') data.opponentScore++;
+                
+                data.roundResults.push(winner);
+                data.currentRound++;
+                
+                setTimeout(() => {
+                    this.checkRaceEnd();
+                }, 1000);
+            }
+        }, 50);
+    },
+    
+    calculateSpeed(stats) {
+        const baseSpeed = stats.speed || 0;
+        const powerBonus = (stats.power || 0) * 0.3;
+        const staminaBonus = (stats.stamina || 0) * 0.2;
+        const magicBonus = (stats.magic || 0) * 0.1;
+        const techBonus = (stats.tech || 0) * 0.15;
+        
+        const total = baseSpeed + powerBonus + staminaBonus + magicBonus + techBonus;
+        return total / 100 + Math.random() * 0.2;
+    },
+    
+    checkRaceEnd() {
+        const data = GameState.raceData;
+        
+        if (data.playerScore >= 2) {
+            this.endRace(true);
+        } else if (data.opponentScore >= 2) {
+            this.endRace(false);
+        } else if (data.currentRound >= 3) {
+            const winner = data.playerScore > data.opponentScore;
+            this.endRace(winner);
+        } else {
+            this.updateRaceUI(data.currentRound);
+            this.runRaceRound();
+        }
+    },
+    
+    endRace(won) {
+        document.getElementById('race-arena').classList.add('hidden');
+        document.getElementById('race-prep').classList.remove('hidden');
+        
+        GameState.totalRaces++;
+        
+        if (won) {
+            GameState.wins++;
+            GameState.gold += CONFIG.WIN_REWARD;
+            this.switchScreen('victory');
+            document.querySelector('.reward-panel.victory .reward-value').textContent = '+' + CONFIG.WIN_REWARD;
+            document.querySelector('.reward-panel.victory .current-gold').textContent = '当前马币: ' + GameState.gold;
+        } else {
+            GameState.losses++;
+            this.switchScreen('defeat');
+            document.querySelector('.reward-panel.defeat .reward-value').textContent = '-' + CONFIG.RACE_FEE;
+            document.querySelector('.reward-panel.defeat .current-gold').textContent = '当前马币: ' + GameState.gold;
+        }
+        
+        this.saveGame();
+        this.updateUI();
+    },
+    
+    raceAction() {
+        const playerHorseEl = document.getElementById('player-horse');
+        playerHorseEl.style.transform = 'translateY(-50%) scale(1.1)';
+        setTimeout(() => {
+            playerHorseEl.style.transform = 'translateY(-50%) scale(1)';
+        }, 100);
+    },
+    
+    viewReplay() {
+        this.showNotification('回放功能开发中', 'warning');
+    },
+    
+    showNotification(message, type = 'success') {
+        const container = document.getElementById('notifications');
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `<div class="notification-text">${message}</div>`;
+        
+        container.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    },
+    
+    setupEventListeners() {
+        document.addEventListener('DOMContentLoaded', () => {
+            this.init();
         });
     }
-}
+};
 
-// 绘制货架
-function drawShelves() {
-    gameState.shelves.forEach(shelf => {
-        const shelfConfig = CONFIG.shelfTypes[shelf.type];
-        const shelfImage = shelfConfig ? ImageManager.getImage(shelfConfig.image) : null;
+const Shop = {
+    currentType: 'head',
+    recommendItemId: 'head_rainbow_helmet',
+    
+    filterType(type) {
+        this.currentType = type;
+        document.querySelectorAll('.shop-tab').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.type === type);
+        });
+        this.renderItems(type);
+    },
+    
+    renderItems(type) {
+        const container = document.getElementById('shop-items');
+        if (!container) return;
         
-        if (shelfImage) {
-            ctx.drawImage(shelfImage, shelf.x, shelf.y, shelf.width, shelf.height);
-        } else {
-            ctx.fillStyle = CONFIG.colors.shelf;
-            ctx.fillRect(shelf.x, shelf.y, shelf.width, shelf.height);
+        const items = SHOP_ITEMS.filter(item => item.type === type);
+        
+        container.innerHTML = items.map(item => {
+            const isOwned = GameState.inventory.some(i => i.id === item.id);
+            const canBuy = GameState.gold >= item.price && !isOwned;
             
-            ctx.strokeStyle = shelf.color;
-            ctx.lineWidth = 4;
-            ctx.strokeRect(shelf.x, shelf.y, shelf.width, shelf.height);
+            return `
+                <div class="shop-item" onclick="${canBuy ? `Shop.buyItem('${item.id}')` : ''}">
+                    <img class="shop-item-icon" src="assets/images/shop/shop_item_${item.id}.png" alt="${item.name}" data-sprite="shop_item_${item.id}">
+                    <span class="shop-item-name">${item.name}</span>
+                    <div class="shop-item-price-row">
+                        <img class="shop-item-price-icon" src="assets/images/ui/shop_gold_icon.png" alt="gold">
+                        <span class="shop-item-price">${item.price}马币</span>
+                    </div>
+                    <button class="shop-item-buy-btn" ${!canBuy ? 'disabled' : ''} onclick="${canBuy ? `Shop.buyItem('${item.id}')` : ''}">
+                        <img src="assets/images/ui/shop_btn_buy.png" alt="${isOwned ? '已拥有' : '购买'}">
+                    </button>
+                </div>
+            `;
+        }).join('');
+    },
+    
+    buyItem(itemId) {
+        const item = SHOP_ITEMS.find(i => i.id === itemId);
+        if (!item) return;
+        
+        if (GameState.inventory.some(i => i.id === itemId)) {
+            Game.showNotification('已拥有该部件', 'warning');
+            return;
+        }
+        
+        if (GameState.gold < item.price) {
+            Game.showNotification('马币不足', 'error');
+            return;
+        }
+        
+        GameState.gold -= item.price;
+        GameState.inventory.push({ ...item });
+        
+        Game.saveGame();
+        Game.updateUI();
+        this.renderItems(this.currentType);
+        Game.showNotification(`购买成功!`, 'success');
+    },
+    
+    buyRecommend() {
+        this.buyItem(this.recommendItemId);
+    },
+    
+    init() {
+        const recommendItem = SHOP_ITEMS.find(i => i.id === this.recommendItemId);
+        if (recommendItem) {
+            const nameEl = document.getElementById('recommend-name');
+            const priceEl = document.getElementById('recommend-price');
+            if (nameEl) nameEl.textContent = recommendItem.name;
+            if (priceEl) priceEl.textContent = recommendItem.price;
+        }
+        this.filterType('head');
+    }
+};
+
+const PartSelector = {
+    filterCategory(category) {
+        document.querySelectorAll('.modal-tab-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.category === category);
+        });
+        this.renderParts(GameState.partSelectorType, category);
+    },
+    
+    renderParts(type, category = 'all') {
+        const container = document.getElementById('parts-grid');
+        if (!container) return;
+        
+        let items = GameState.inventory.filter(item => item.type === type);
+        
+        if (category !== 'all') {
+            items = items.filter(item => item.category === category);
+        }
+        
+        container.innerHTML = items.map((item, index) => {
+            const isSelected = GameState.selectedPart && GameState.selectedPart.id === item.id;
             
-            ctx.fillStyle = shelf.color;
-            ctx.beginPath();
-            ctx.arc(shelf.x + shelf.width / 2, shelf.y + shelf.height / 2, 25, 0, Math.PI * 2);
-            ctx.fill();
+            const statHtml = [];
+            if (item.stats.speed) statHtml.push(`速度 +${item.stats.speed}`);
+            if (item.stats.power) statHtml.push(`力量 +${item.stats.power}`);
+            if (item.stats.stamina) statHtml.push(`耐力 +${item.stats.stamina}`);
+            if (item.stats.magic) statHtml.push(`魔力 +${item.stats.magic}`);
+            if (item.stats.tech) statHtml.push(`科技 +${item.stats.tech}`);
             
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 14px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText(shelf.type, shelf.x + shelf.width / 2, shelf.y + shelf.height - 15);
-        }
-    });
-}
-
-// 绘制传送带
-function drawConveyor() {
-    const y = canvas.height - 90; // 传送带位置上移
-    const conveyorImage = ImageManager.getImage(CONFIG.images.conveyor);
-    
-    if (conveyorImage) {
-        ctx.drawImage(conveyorImage, 0, y - 45, canvas.width, 90); // 缩小传送带高度
-    } else {
-        ctx.fillStyle = CONFIG.colors.conveyor;
-        ctx.fillRect(0, y - 45, canvas.width, 90); // 缩小传送带高度
+            return `
+                <div class="part-card ${isSelected ? 'selected' : ''}" onclick="Game.selectPartForEquip(GameState.inventory[${index}])">
+                    <div class="part-icon">${item.icon}</div>
+                    <div class="part-name">${item.category}-${item.name}</div>
+                    <div class="part-stats">${statHtml.join(', ')}</div>
+                    <div class="part-price owned">✓ 已拥有</div>
+                </div>
+            `;
+        }).join('');
         
-        ctx.fillStyle = '#333';
-        const rollerCount = Math.floor(canvas.width / 50);
-        for (let i = 0; i < rollerCount; i++) {
-            ctx.beginPath();
-            ctx.arc(i * 50 + 25, y, 12, 0, Math.PI * 2); // 缩小滚轴
-            ctx.fill();
+        if (items.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:20px;">暂无该类型部件，请先去商店购买</div>';
         }
     }
-}
+};
 
-// 绘制传送带上的货物
-function drawItems() {
-    gameState.items.forEach(item => {
-        const itemType = CONFIG.itemTypes.find(t => t.name === item.type);
-        const itemImage = itemType ? ImageManager.getImage(itemType.image) : null;
-        
-        if (itemImage) {
-            ctx.drawImage(itemImage, item.x, item.y, item.width, item.height);
-        } else {
-            ctx.fillStyle = item.color;
-            ctx.fillRect(item.x, item.y, item.width, item.height);
-            
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 3;
-            ctx.strokeRect(item.x, item.y, item.width, item.height);
-            
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 16px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(item.type, item.x + item.width / 2, item.y + item.height / 2);
-        }
-    });
-}
-
-// 绘制被扔出的货物
-function drawThrownItems() {
-    gameState.thrownItems.forEach(item => {
-        const itemType = CONFIG.itemTypes.find(t => t.name === item.type);
-        const itemImage = itemType ? ImageManager.getImage(itemType.image) : null;
-        
-        if (itemImage) {
-            ctx.drawImage(itemImage, item.x, item.y, item.width, item.height);
-        } else {
-            ctx.fillStyle = item.color;
-            ctx.fillRect(item.x, item.y, item.width, item.height);
-            
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 3;
-            ctx.strokeRect(item.x, item.y, item.width, item.height);
-            
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 16px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(item.type, item.x + item.width / 2, item.y + item.height / 2);
-        }
-    });
-}
-
-// 绘制瞄准箭头
-function drawSwipeLine() {
-    if (!gameState.touchStart || !gameState.selectedItem) return;
-    
-    const startX = gameState.selectedItem.x + gameState.selectedItem.width / 2;
-    const startY = gameState.selectedItem.y + gameState.selectedItem.height / 2;
-    const endX = gameState.touchStart.x;
-    const endY = gameState.touchStart.y;
-    
-    const dx = startX - endX;
-    const dy = startY - endY;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    
-    // 计算力度（0-1之间）
-    const maxDistance = 200;
-    const power = Math.min(distance / maxDistance, 1);
-    
-    // 计算箭头颜色（从透明到红色）
-    const alpha = 0.3 + power * 0.7;
-    const red = 255;
-    const green = Math.floor(255 * (1 - power));
-    const blue = Math.floor(255 * (1 - power));
-    const arrowColor = `rgba(${red}, ${green}, ${blue}, ${alpha})`;
-    
-    // 计算箭头长度（根据力度）
-    const arrowLength = 50 + power * 100;
-    const angle = Math.atan2(dy, dx);
-    
-    // 箭头终点（指向货物实际飞行的方向）
-    const arrowEndX = startX + Math.cos(angle) * arrowLength;
-    const arrowEndY = startY + Math.sin(angle) * arrowLength;
-    
-    // 绘制箭头线
-    ctx.strokeStyle = arrowColor;
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(startX, startY);
-    ctx.lineTo(arrowEndX, arrowEndY);
-    ctx.stroke();
-    
-    // 绘制箭头头部
-    const arrowHeadSize = 15;
-    ctx.fillStyle = arrowColor;
-    ctx.beginPath();
-    ctx.moveTo(arrowEndX, arrowEndY);
-    ctx.lineTo(
-        arrowEndX - Math.cos(angle - Math.PI / 6) * arrowHeadSize,
-        arrowEndY - Math.sin(angle - Math.PI / 6) * arrowHeadSize
-    );
-    ctx.lineTo(
-        arrowEndX - Math.cos(angle + Math.PI / 6) * arrowHeadSize,
-        arrowEndY - Math.sin(angle + Math.PI / 6) * arrowHeadSize
-    );
-    ctx.closePath();
-    ctx.fill();
-    
-    // 绘制力度指示器
-    ctx.fillStyle = arrowColor;
-    ctx.font = 'bold 14px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(`${Math.round(power * 100)}%`, arrowEndX, arrowEndY - 10);
-}
-
-// 更新游戏状态
-function update(timestamp) {
-    if (!gameState.running) return;
-    
-    gameState.conveyorSpeed += CONFIG.speedIncreaseRate;
-    
-    if (timestamp - gameState.lastItemTime > gameState.itemSpawnInterval) {
-        spawnItem();
-        gameState.lastItemTime = timestamp;
-        if (gameState.itemSpawnInterval > 800) {
-            gameState.itemSpawnInterval -= 10;
-        }
-    }
-    
-    updateConveyorItems();
-    updateThrownItems();
-}
-
-// 更新传送带上的货物
-function updateConveyorItems() {
-    for (let i = gameState.items.length - 1; i >= 0; i--) {
-        const item = gameState.items[i];
-        
-        if (item.onConveyor && !item.selected) {
-            item.x += gameState.conveyorSpeed;
-        }
-        
-        if (item.x > canvas.width) {
-            gameState.items.splice(i, 1);
-            takeDamage();
-        }
-    }
-}
-
-// 更新被扔出的货物
-function updateThrownItems() {
-    const gravity = 0.3;
-    
-    for (let i = gameState.thrownItems.length - 1; i >= 0; i--) {
-        const item = gameState.thrownItems[i];
-        
-        item.vy += gravity;
-        item.x += item.vx;
-        item.y += item.vy;
-        
-        let scored = false;
-        for (const shelf of gameState.shelves) {
-            if (checkCollision(item, shelf)) {
-                if (item.type === shelf.type) {
-                    const actualScore = shelf.score * 10;
-                    if (shelf.score > 0) {
-                        addScore(actualScore);
-                        addScoreEffect(
-                            item.x + item.width / 2,
-                            item.y + item.height / 2,
-                            actualScore,
-                            shelf.color
-                        );
-                    }
-                } else {
-                    takeDamage();
-                }
-                scored = true;
-                break;
-            }
-        }
-        
-        // 墙壁反弹效果
-        if (item.x < 0) {
-            item.x = 0;
-            item.vx = -item.vx * 0.8; // 反弹并减少一些速度
-        } else if (item.x + item.width > canvas.width) {
-            item.x = canvas.width - item.width;
-            item.vx = -item.vx * 0.8; // 反弹并减少一些速度
-        }
-        
-        if (scored) {
-            gameState.thrownItems.splice(i, 1);
-        } else if (item.y > canvas.height || item.y < -100) {
-            // 货物飞出屏幕，扣血
-            takeDamage();
-            gameState.thrownItems.splice(i, 1);
-        }
-    }
-}
-
-// 碰撞检测
-function checkCollision(item, shelf) {
-    return item.x < shelf.x + shelf.width &&
-           item.x + item.width > shelf.x &&
-           item.y < shelf.y + shelf.height &&
-           item.y + item.height > shelf.y;
-}
-
-// 增加分数
-function addScore(points) {
-    gameState.score += points;
-    document.getElementById('score').textContent = gameState.score;
-}
-
-// 扣血
-function takeDamage() {
-    gameState.health--;
-    updateHealthBar();
-    
-    if (gameState.health <= 0) {
-        endGame();
-    }
-}
-
-// 更新血条显示
-function updateHealthBar() {
-    const healthPercent = (gameState.health / CONFIG.maxHealth) * 100;
-    document.getElementById('health-bar').style.width = healthPercent + '%';
-}
-
-// 触摸/鼠标事件处理
-function getPointerPosition(e) {
-    const rect = canvas.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    
-    return {
-        x: clientX - rect.left,
-        y: clientY - rect.top
-    };
-}
-
-function handleStart(e) {
-    if (!gameState.running) return;
-    
-    e.preventDefault();
-    const pos = getPointerPosition(e);
-    
-    for (let i = gameState.items.length - 1; i >= 0; i--) {
-        const item = gameState.items[i];
-        if (pos.x >= item.x && pos.x <= item.x + item.width &&
-            pos.y >= item.y && pos.y <= item.y + item.height) {
-            gameState.selectedItem = item;
-            item.selected = true;
-            gameState.touchStart = pos;
-            break;
-        }
-    }
-}
-
-function handleMove(e) {
-    if (!gameState.running || !gameState.touchStart) return;
-    
-    e.preventDefault();
-    const pos = getPointerPosition(e);
-    gameState.touchStart = pos;
-}
-
-function handleEnd(e) {
-    if (!gameState.running || !gameState.selectedItem || !gameState.touchStart) return;
-    
-    e.preventDefault();
-    
-    const item = gameState.selectedItem;
-    const startX = item.x + item.width / 2;
-    const startY = item.y + item.height / 2;
-    const endX = gameState.touchStart.x;
-    const endY = gameState.touchStart.y;
-    
-    const dx = startX - endX;
-    const dy = startY - endY;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    
-    const maxSpeed = 35;
-    const speed = Math.min(distance / 6, maxSpeed);
-    const angle = Math.atan2(dy, dx);
-    
-    item.vx = Math.cos(angle) * speed;
-    item.vy = Math.sin(angle) * speed;
-    item.onConveyor = false;
-    item.selected = false;
-    
-    const index = gameState.items.indexOf(item);
-    if (index > -1) {
-        gameState.items.splice(index, 1);
-    }
-    gameState.thrownItems.push(item);
-    
-    gameState.selectedItem = null;
-    gameState.touchStart = null;
-}
-
-// 游戏循环
-function gameLoop(timestamp) {
-    update(timestamp);
-    draw();
-    requestAnimationFrame(gameLoop);
-}
-
-// 开始游戏
-function startGame() {
-    gameState = {
-        running: true,
-        score: 0,
-        health: CONFIG.maxHealth,
-        conveyorSpeed: CONFIG.baseConveyorSpeed,
-        items: [],
-        thrownItems: [],
-        shelves: gameState.shelves,
-        lastItemTime: 0,
-        itemSpawnInterval: 1500,
-        touchStart: null,
-        selectedItem: null,
-        effects: []
-    };
-    
-    document.getElementById('score').textContent = '0';
-    updateHealthBar();
-    
-    document.getElementById('start-screen').classList.add('hidden');
-    document.getElementById('game-screen').classList.remove('hidden');
-    document.getElementById('end-screen').classList.add('hidden');
-}
-
-// 结束游戏
-function endGame() {
-    gameState.running = false;
-    
-    document.getElementById('final-score').textContent = gameState.score;
-    
-    updateLeaderboard();
-    
-    document.getElementById('game-screen').classList.add('hidden');
-    document.getElementById('end-screen').classList.remove('hidden');
-}
-
-// 更新排行榜
-function updateLeaderboard() {
-    const playerEntry = { name: '我', score: gameState.score };
-    leaderboardData.push(playerEntry);
-    leaderboardData.sort((a, b) => b.score - a.score);
-    leaderboardData = leaderboardData.slice(0, 10);
-    
-    const listEl = document.getElementById('leaderboard-list');
-    listEl.innerHTML = '';
-    
-    let playerRank = -1;
-    
-    leaderboardData.forEach((entry, index) => {
-        const li = document.createElement('li');
-        if (entry.name === '我' && entry.score === gameState.score) {
-            li.classList.add('current-player');
-            playerRank = index + 1;
-        }
-        li.innerHTML = `<span>${index + 1}. ${entry.name}</span><span>${entry.score}</span>`;
-        listEl.appendChild(li);
-    });
-    
-    const rankEl = document.getElementById('player-rank');
-    if (playerRank > 0) {
-        rankEl.textContent = `你的排名: 第${playerRank}名`;
-    } else {
-        rankEl.textContent = '';
-    }
-}
-
-// 分享功能
-function shareGame() {
-    if (navigator.share) {
-        navigator.share({
-            title: '货物归类游戏',
-            text: `我在货物归类游戏中获得了 ${gameState.score} 分！来挑战我吧！`,
-            url: window.location.href
-        }).then(() => {
-            startGame();
-        }).catch(console.error);
-    } else {
-        alert(`分享成功！你获得了 ${gameState.score} 分！`);
-        startGame();
-    }
-}
-
-// 初始化事件监听
-function initEvents() {
-    canvas.addEventListener('mousedown', handleStart);
-    canvas.addEventListener('mousemove', handleMove);
-    canvas.addEventListener('mouseup', handleEnd);
-    canvas.addEventListener('mouseleave', handleEnd);
-    
-    canvas.addEventListener('touchstart', handleStart, { passive: false });
-    canvas.addEventListener('touchmove', handleMove, { passive: false });
-    canvas.addEventListener('touchend', handleEnd, { passive: false });
-    canvas.addEventListener('touchcancel', handleEnd, { passive: false });
-    
-    document.getElementById('start-btn').addEventListener('click', startGame);
-    document.getElementById('restart-btn').addEventListener('click', startGame);
-    document.getElementById('share-btn').addEventListener('click', shareGame);
-    
-    window.addEventListener('resize', resizeCanvas);
-}
-
-// 预加载所有图片资源
-async function preloadImages() {
-    const allImages = [];
-    
-    // 背景和传送带
-    allImages.push(ImageManager.loadImage(CONFIG.images.background));
-    allImages.push(ImageManager.loadImage(CONFIG.images.conveyor));
-    
-    // 货物图片
-    CONFIG.itemTypes.forEach(type => {
-        allImages.push(ImageManager.loadImage(type.image));
-    });
-    
-    // 货架图片
-    Object.values(CONFIG.shelfTypes).forEach(shelfType => {
-        allImages.push(ImageManager.loadImage(shelfType.image));
-    });
-    
-    await Promise.all(allImages);
-    console.log('所有图片资源加载完成（或尝试加载完毕）');
-}
-
-// 初始化游戏
-async function init() {
-    await preloadImages();
-    resizeCanvas();
-    initEvents();
-    requestAnimationFrame(gameLoop);
-}
-
-// 启动游戏
-init();
+Game.init();

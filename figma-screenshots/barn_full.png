@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Error><Code>NoSuchBucket</Code><Message>The specified bucket does not exist</Message><BucketName>figma-cors-proxy-production</BucketName><RequestId>QRZ129KM3B7XVSGB</RequestId><HostId>9oHS7czxQmtoy/onDFjR8iBaIQuF/IbA5ODZlp9Y01K1oo5ZLWS9fS/4Z/N5ZF3glCk4kagtLFjNQ0jtjq2EVkVH1cXEIlBz</HostId></Error>
