@@ -57,12 +57,26 @@
     "shop_tab_special": "ui/shop_tab_special.png",
     "shop_recommend_title": "ui/shop_recommend_title.png",
     "shop_btn_buy": "ui/shop_btn_buy.png",
-    "shop_btn_back": "ui/shop_btn_back.png"
+    "shop_btn_back": "ui/shop_btn_back.png",
+    "race_title": "ui/race_title.png",
+    "race_btn_back": "ui/race_btn_back.png",
+    "race_gold_icon": "ui/race_gold_icon.png",
+    "race_gold_label": "ui/race_gold_label.png",
+    "race_panel_title_player": "ui/race_panel_title_player.png",
+    "race_panel_title_opponent": "ui/race_panel_title_opponent.png",
+    "race_vs": "ui/race_vs.png",
+    "race_flag": "ui/race_flag.png",
+    "race_btn_start": "ui/race_btn_start.png",
+    "race_horse_player_1": "race/race_horse_player_1.png",
+    "race_horse_player_2": "race/race_horse_player_2.png",
+    "race_horse_player_3": "race/race_horse_player_3.png",
+    "race_horse_opponent": "race/race_horse_opponent.png"
   },
   "backgrounds": {
     "main_bg": "backgrounds/main_bg.png",
     "barn_bg": "backgrounds/barn_bg.png",
-    "shop_bg": "backgrounds/shop_bg.png"
+    "shop_bg": "backgrounds/shop_bg.png",
+    "race_bg": "backgrounds/race_bg.png"
   },
   "characters": {
     "main_horse": "characters/main_horse.png",
@@ -78,5 +92,11 @@
   },
   "shop": {
     "shop_recommend_icon": "shop/shop_recommend_icon.png"
+  },
+  "race": {
+    "race_horse_player_1": "race/race_horse_player_1.png",
+    "race_horse_player_2": "race/race_horse_player_2.png",
+    "race_horse_player_3": "race/race_horse_player_3.png",
+    "race_horse_opponent": "race/race_horse_opponent.png"
   }
 }

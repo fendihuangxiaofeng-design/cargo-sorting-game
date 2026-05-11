@@ -1029,124 +1029,189 @@ body {
   object-fit: contain;
 }
 
-.race-screen {
-  padding: 16px;
+.race-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
 }
 
-.entry-fee {
+.race-btn-back {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.race-btn-back img {
+  height: 48px;
+  object-fit: contain;
+}
+
+.race-title {
+  height: 56px;
+  object-fit: contain;
+}
+
+.race-gold {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  background: #16213E;
-  border: 4px solid #000000;
-  border-radius: 10px;
-  padding: 12px;
-  margin-bottom: 20px;
+  gap: 8px;
 }
 
-.fee-text {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: #FFFFFF;
+.race-gold img {
+  height: 36px;
+  object-fit: contain;
 }
 
-.fee-value {
+.race-gold-label {
   font-family: var(--font-pixel);
   font-size: 14px;
   color: #FFD700;
+}
+
+.race-gold-value {
+  font-family: var(--font-pixel);
+  font-size: 20px;
+  color: #FFD700;
+  font-weight: bold;
+}
+
+.race-prep {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 24px;
 }
 
 .teams-container {
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 24px;
   margin-bottom: 24px;
 }
 
 .team-panel {
-  width: 35%;
-  background: #16213E;
-  border: 4px solid #000000;
-  border-radius: 10px;
-  padding: 16px;
+  width: 38%;
+  background: transparent;
+  border: none;
+  border-radius: 12px;
 }
 
 .team-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px;
-  background: #4CAF50;
-  border-radius: 6px;
-  margin-bottom: 14px;
+  margin-bottom: 8px;
 }
 
-.team-label {
-  font-family: var(--font-pixel);
-  font-size: 10px;
-  color: #FFFFFF;
-}
-
-.opponent-team .team-header {
-  background: #FF6B6B;
+.team-header img {
+  width: 100%;
+  object-fit: contain;
 }
 
 .horse-cards {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .horse-card {
-  background: #1F3460;
-  border: 3px solid #000000;
-  border-radius: 6px;
-  padding: 10px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .horse-card-number {
   width: 36px;
   height: 36px;
-  background: #4CAF50;
-  border: 2px solid #000000;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-pixel);
-  font-size: 12px;
-  color: #FFFFFF;
 }
 
-.opponent-team .horse-card-number {
-  background: #FF6B6B;
+.horse-card-number img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .horse-card-icon {
-  font-size: 28px;
+  width: 48px;
+  height: 48px;
+}
+
+.horse-card-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.horse-card-info {
+  flex: 1;
 }
 
 .horse-card-name {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 14px;
   color: #FFFFFF;
 }
 
-.vs-badge {
-  font-family: var(--font-pixel);
-  font-size: 36px;
-  color: #FFD700;
-  text-shadow: 2px 2px 0 #000000;
+.horse-card-stats {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
 }
 
-.btn-race {
-  width: 100%;
-  padding: 18px;
-  font-size: 14px;
+.stat-dot {
+  width: 12px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.stat-dot.speed { background: #4CAF50; }
+.stat-dot.power { background: #3498DB; }
+.stat-dot.stamina { background: #FFD700; }
+.stat-dot.magic { background: #9B59B6; }
+
+.vs-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vs-badge img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+
+.race-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+}
+
+.race-flag-left, .race-flag-right {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
+
+.race-btn-start {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.race-btn-start img {
+  width: 400px;
+  object-fit: contain;
 }
 
 .race-arena {

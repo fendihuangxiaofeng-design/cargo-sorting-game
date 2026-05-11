@@ -348,49 +348,52 @@
 
         <!-- 赛场界面 -->
         <div id="race-screen" class="screen landscape hidden">
-            <div class="screen-bg race-bg">
-                <div class="race-track-bg"></div>
-            </div>
+            <div class="screen-bg" data-sprite="race_bg"></div>
             
-            <div class="screen-header">
-                <button class="btn-back" onclick="Game.switchScreen('main')">←</button>
-                <h2 class="screen-title">三局两胜赛马</h2>
-                <div class="gold-display small">
-                    <span class="gold-icon">🪙</span>
-                    <span id="race-gold">6000</span>
+            <div class="race-header">
+                <button class="race-btn-back" onclick="Game.switchScreen('barn')">
+                    <img data-sprite="race_btn_back" src="assets/images/ui/race_btn_back.png" alt="返回">
+                </button>
+                
+                <img class="race-title" data-sprite="race_title" src="assets/images/ui/race_title.png" alt="三局两胜赛马">
+                
+                <div class="race-gold">
+                    <img data-sprite="race_gold_icon" src="assets/images/ui/race_gold_icon.png" alt="gold">
+                    <span class="race-gold-label" data-sprite="race_gold_label">马币:</span>
+                    <span class="race-gold-value" id="race-gold">6000</span>
                 </div>
             </div>
             
             <div class="race-prep" id="race-prep">
-                <div class="entry-fee">
-                    <span class="fee-icon">🎫</span>
-                    <span class="fee-text">参赛费用: </span>
-                    <span class="fee-value">🪙 50</span>
-                </div>
-                
                 <div class="teams-container">
                     <div class="team-panel player-team">
-                        <div class="team-header">
-                            <span class="team-label">我的马匹</span>
-                            <span class="team-icon">👤</span>
+                        <div class="team-header player-header">
+                            <img data-sprite="race_panel_title_player" src="assets/images/ui/race_panel_title_player.png" alt="我的马匹">
                         </div>
                         <div class="horse-cards" id="player-horses">
                         </div>
                     </div>
                     
-                    <div class="vs-badge">VS</div>
+                    <div class="vs-badge">
+                        <img data-sprite="race_vs" src="assets/images/ui/race_vs.png" alt="VS">
+                    </div>
                     
                     <div class="team-panel opponent-team">
-                        <div class="team-header">
-                            <span class="team-label">对手</span>
-                            <span class="team-icon">🤖</span>
+                        <div class="team-header opponent-header">
+                            <img data-sprite="race_panel_title_opponent" src="assets/images/ui/race_panel_title_opponent.png" alt="对手马匹">
                         </div>
                         <div class="horse-cards" id="opponent-horses">
                         </div>
                     </div>
                 </div>
                 
-                <button class="btn btn-primary btn-large btn-race" onclick="Game.startRace()">开始比赛</button>
+                <div class="race-actions">
+                    <img class="race-flag-left" data-sprite="race_flag" src="assets/images/ui/race_flag.png" alt="flag">
+                    <button class="race-btn-start" onclick="Game.startRace()">
+                        <img data-sprite="race_btn_start" src="assets/images/ui/race_btn_start.png" alt="开始比赛">
+                    </button>
+                    <img class="race-flag-right" data-sprite="race_flag" src="assets/images/ui/race_flag.png" alt="flag">
+                </div>
             </div>
             
             <div class="race-arena hidden" id="race-arena">

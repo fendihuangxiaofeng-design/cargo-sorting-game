@@ -378,12 +378,15 @@ const Game = {
             card.className = 'horse-card';
             
             const hasParts = horse.parts.head || horse.parts.body || horse.parts.legs || horse.parts.tail;
-            const horseIcon = hasParts ? '🐴' : '❓';
-            const colors = ['#4ECDC4', '#FF6B6B', '#FFE66D'];
+            const horseSprite = hasParts ? `race_horse_player_${index + 1}` : 'race_horse_player_1';
             
             card.innerHTML = `
-                <div class="horse-card-number" style="background: ${colors[index]}">${index + 1}</div>
-                <div class="horse-card-icon">${horseIcon}</div>
+                <div class="horse-card-number">
+                    <img src="assets/images/ui/race_player_num_${index + 1}.png" alt="${index + 1}" data-sprite="race_player_num_${index + 1}">
+                </div>
+                <div class="horse-card-icon">
+                    <img src="assets/images/race/${horseSprite}.png" alt="${horse.name}" data-sprite="${horseSprite}">
+                </div>
                 <div class="horse-card-info">
                     <div class="horse-card-name">${horse.name}</div>
                     <div class="horse-card-stats">
@@ -402,8 +405,12 @@ const Game = {
             const card = document.createElement('div');
             card.className = 'horse-card';
             card.innerHTML = `
-                <div class="horse-card-number" style="background: #FF6B6B">${i + 1}</div>
-                <div class="horse-card-icon">❓</div>
+                <div class="horse-card-number">
+                    <img src="assets/images/ui/race_opponent_num_${i + 1}.png" alt="${i + 1}" data-sprite="race_opponent_num_${i + 1}">
+                </div>
+                <div class="horse-card-icon">
+                    <img src="assets/images/race/race_horse_opponent.png" alt="opponent" data-sprite="race_horse_opponent">
+                </div>
                 <div class="horse-card-info">
                     <div class="horse-card-name">????</div>
                     <div class="horse-card-stats">
