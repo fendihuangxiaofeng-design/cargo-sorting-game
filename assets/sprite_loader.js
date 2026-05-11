@@ -1,11 +1,12 @@
 const SpriteLoader = (function() {
-    const config = null;
+    let config = null;
     const loadedSprites = {};
     
     async function loadConfig() {
         try {
             const response = await fetch('./assets/sprite_config.json');
-            return await response.json();
+            config = await response.json();
+            return config;
         } catch (error) {
             console.error('Failed to load sprite config:', error);
             return null;

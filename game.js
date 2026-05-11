@@ -113,9 +113,15 @@ const Game = {
             el.textContent = GameState.gold;
         });
         
-        document.getElementById('total-races').textContent = GameState.totalRaces;
-        const winRate = GameState.totalRaces > 0 ? Math.round((GameState.wins / GameState.totalRaces) * 100) : 0;
-        document.getElementById('win-rate').textContent = winRate + '%';
+        const totalRacesEl = document.getElementById('total-races');
+        if (totalRacesEl) {
+            totalRacesEl.textContent = GameState.totalRaces;
+        }
+        const winRateEl = document.getElementById('win-rate');
+        if (winRateEl) {
+            const winRate = GameState.totalRaces > 0 ? Math.round((GameState.wins / GameState.totalRaces) * 100) : 0;
+            winRateEl.textContent = winRate + '%';
+        }
         
         this.updateHorseStats();
         this.updateHorseCards();
