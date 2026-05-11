@@ -1,49 +1,18 @@
 const SHOP_ITEMS = [
-    { id: 'h1', type: 'head', category: 'common', name: '普通-低级', icon: '🐴', price: 50, stats: { speed: 60, power: 40 } },
-    { id: 'h2', type: 'head', category: 'common', name: '普通-中级', icon: '🐴', price: 100, stats: { speed: 75, power: 60 } },
-    { id: 'h3', type: 'head', category: 'common', name: '普通-高级', icon: '🐴', price: 150, stats: { speed: 90, power: 80 } },
-    { id: 'h4', type: 'head', category: 'tech', name: '科技-低级', icon: '🤖', price: 50, stats: { speed: 65, tech: 50 } },
-    { id: 'h5', type: 'head', category: 'tech', name: '科技-中级', icon: '🤖', price: 100, stats: { speed: 80, tech: 65 } },
-    { id: 'h6', type: 'head', category: 'tech', name: '科技-高级', icon: '🤖', price: 150, stats: { speed: 95, tech: 85 } },
-    { id: 'h7', type: 'head', category: 'magic', name: '魔法-低级', icon: '🦄', price: 50, stats: { speed: 70, magic: 50 } },
-    { id: 'h8', type: 'head', category: 'magic', name: '魔法-中级', icon: '🦄', price: 100, stats: { speed: 85, magic: 65 } },
-    { id: 'h9', type: 'head', category: 'magic', name: '魔法-高级', icon: '🦄', price: 150, stats: { speed: 100, magic: 90 } },
+    { id: 'head_round', type: 'head', category: 'common', name: '圆形头盔', icon: '🔵', price: 80, stats: { speed: 60, power: 50 } },
+    { id: 'head_triangle', type: 'head', category: 'common', name: '三角头盔', icon: '🔺', price: 60, stats: { speed: 55, power: 45 } },
+    { id: 'head_square', type: 'head', category: 'common', name: '方形头盔', icon: '🟦', price: 70, stats: { speed: 58, power: 48 } },
+    { id: 'head_diamond', type: 'head', category: 'magic', name: '菱形头盔', icon: '💎', price: 90, stats: { speed: 65, magic: 30 } },
+    { id: 'head_rainbow_helmet', type: 'head', category: 'magic', name: '炫彩战马头盔', icon: '🌈', price: 150, stats: { speed: 80, power: 50, magic: 40 } },
     
-    { id: 'b1', type: 'body', category: 'common', name: '普通-低级', icon: '🦴', price: 50, stats: { stamina: 50, power: 30 } },
-    { id: 'b2', type: 'body', category: 'common', name: '普通-中级', icon: '🦴', price: 100, stats: { stamina: 70, power: 50 } },
-    { id: 'b3', type: 'body', category: 'common', name: '普通-高级', icon: '🦴', price: 150, stats: { stamina: 90, power: 70 } },
-    { id: 'b4', type: 'body', category: 'tech', name: '科技-低级', icon: '⚙️', price: 50, stats: { stamina: 45, tech: 40 } },
-    { id: 'b5', type: 'body', category: 'tech', name: '科技-中级', icon: '⚙️', price: 100, stats: { stamina: 65, tech: 60 } },
-    { id: 'b6', type: 'body', category: 'tech', name: '科技-高级', icon: '⚙️', price: 150, stats: { stamina: 85, tech: 80 } },
-    { id: 'b7', type: 'body', category: 'magic', name: '魔法-低级', icon: '✨', price: 50, stats: { stamina: 40, magic: 45 } },
-    { id: 'b8', type: 'body', category: 'magic', name: '魔法-中级', icon: '✨', price: 100, stats: { stamina: 60, magic: 65 } },
-    { id: 'b9', type: 'body', category: 'magic', name: '魔法-高级', icon: '✨', price: 150, stats: { stamina: 80, magic: 85 } },
+    { id: 'body_cross', type: 'body', category: 'tech', name: '十字躯甲', icon: '➕', price: 120, stats: { stamina: 70, tech: 35 } },
+    { id: 'body_warrior', type: 'body', category: 'common', name: '勇士护甲', icon: '🛡️', price: 110, stats: { stamina: 75, power: 40 } },
     
-    { id: 'l1', type: 'legs', category: 'common', name: '普通-低级', icon: '🦵', price: 50, stats: { speed: 50, stamina: 30 } },
-    { id: 'l2', type: 'legs', category: 'common', name: '普通-中级', icon: '🦵', price: 100, stats: { speed: 70, stamina: 50 } },
-    { id: 'l3', type: 'legs', category: 'common', name: '普通-高级', icon: '🦵', price: 150, stats: { speed: 90, stamina: 70 } },
-    { id: 'l4', type: 'legs', category: 'tech', name: '科技-低级', icon: '🚀', price: 50, stats: { speed: 55, tech: 35 } },
-    { id: 'l5', type: 'legs', category: 'tech', name: '科技-中级', icon: '🚀', price: 100, stats: { speed: 75, tech: 55 } },
-    { id: 'l6', type: 'legs', category: 'tech', name: '科技-高级', icon: '🚀', price: 150, stats: { speed: 95, tech: 75 } },
-    { id: 'l7', type: 'legs', category: 'magic', name: '魔法-低级', icon: '👢', price: 50, stats: { speed: 45, magic: 40 } },
-    { id: 'l8', type: 'legs', category: 'magic', name: '魔法-中级', icon: '👢', price: 100, stats: { speed: 65, magic: 60 } },
-    { id: 'l9', type: 'legs', category: 'magic', name: '魔法-高级', icon: '👢', price: 150, stats: { speed: 85, magic: 80 } },
+    { id: 'legs_wind', type: 'legs', category: 'tech', name: '疾风腿甲', icon: '🌪️', price: 90, stats: { speed: 70, tech: 25 } },
     
-    { id: 't1', type: 'tail', category: 'common', name: '普通-低级', icon: '🎿', price: 50, stats: { stamina: 40, power: 20 } },
-    { id: 't2', type: 'tail', category: 'common', name: '普通-中级', icon: '🎿', price: 100, stats: { stamina: 60, power: 40 } },
-    { id: 't3', type: 'tail', category: 'common', name: '普通-高级', icon: '🎿', price: 150, stats: { stamina: 80, power: 60 } },
-    { id: 't4', type: 'tail', category: 'tech', name: '科技-低级', icon: '🔌', price: 50, stats: { stamina: 35, tech: 30 } },
-    { id: 't5', type: 'tail', category: 'tech', name: '科技-中级', icon: '🔌', price: 100, stats: { stamina: 55, tech: 50 } },
-    { id: 't6', type: 'tail', category: 'tech', name: '科技-高级', icon: '🔌', price: 150, stats: { stamina: 75, tech: 70 } },
-    { id: 't7', type: 'tail', category: 'magic', name: '魔法-低级', icon: '🎀', price: 50, stats: { stamina: 30, magic: 35 } },
-    { id: 't8', type: 'tail', category: 'magic', name: '魔法-中级', icon: '🎀', price: 100, stats: { stamina: 50, magic: 55 } },
-    { id: 't9', type: 'tail', category: 'magic', name: '魔法-高级', icon: '🎀', price: 150, stats: { stamina: 70, magic: 75 } },
+    { id: 'tail_shine', type: 'tail', category: 'magic', name: '流光尾翼', icon: '✨', price: 130, stats: { stamina: 60, magic: 35 } },
     
-    { id: 's1', type: 'special', category: 'common', name: '普通头饰', icon: '🎩', price: 100, stats: { speed: 10, power: 10 } },
-    { id: 's2', type: 'special', category: 'tech', name: '科技头盔', icon: '🎯', price: 150, stats: { tech: 30 } },
-    { id: 's3', type: 'special', category: 'magic', name: '魔法皇冠', icon: '👑', price: 200, stats: { magic: 40 } },
-    { id: 'e1', type: 'extra', category: 'tech', name: '加速器', icon: '⚡', price: 200, stats: { speed: 30 } },
-    { id: 'e2', type: 'extra', category: 'magic', name: '魔法护符', icon: '🔮', price: 250, stats: { magic: 50 } }
+    { id: 'special_crown', type: 'special', category: 'magic', name: '魔法皇冠', icon: '👑', price: 200, stats: { magic: 50 } }
 ];
 
 const HORSE_NAMES = ['的卢', '赤兔', '绝影'];
@@ -137,7 +106,7 @@ const Game = {
         document.getElementById(screenName + '-screen').classList.remove('hidden');
         
         if (screenName === 'shop') {
-            Shop.renderItems('head');
+            Shop.init();
         }
         
         if (screenName === 'race') {
@@ -646,10 +615,11 @@ const Game = {
 
 const Shop = {
     currentType: 'head',
+    recommendItemId: 'head_rainbow_helmet',
     
     filterType(type) {
         this.currentType = type;
-        document.querySelectorAll('.shop-tab-btn').forEach(btn => {
+        document.querySelectorAll('.shop-tab').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.type === type);
         });
         this.renderItems(type);
@@ -665,34 +635,17 @@ const Shop = {
             const isOwned = GameState.inventory.some(i => i.id === item.id);
             const canBuy = GameState.gold >= item.price && !isOwned;
             
-            const statHtml = [];
-            if (item.stats.speed) statHtml.push(`速度 +${item.stats.speed}`);
-            if (item.stats.power) statHtml.push(`力量 +${item.stats.power}`);
-            if (item.stats.stamina) statHtml.push(`耐力 +${item.stats.stamina}`);
-            if (item.stats.magic) statHtml.push(`魔力 +${item.stats.magic}`);
-            if (item.stats.tech) statHtml.push(`科技 +${item.stats.tech}`);
-            
             return `
-                <div class="shop-item" onclick="Shop.buyItem('${item.id}')">
-                    <div class="shop-item-header">
-                        <div class="shop-item-icon">${item.icon}</div>
-                        <div class="shop-item-info">
-                            <div class="shop-item-name">${item.category}-${item.name}</div>
-                            <div class="shop-item-category">${Game.getPartTypeName(item.type)}</div>
-                        </div>
-                    </div>
-                    <div class="shop-item-stats">
-                        ${statHtml.map(s => `<span class="shop-item-stat">${s}</span>`).join('')}
-                    </div>
+                <div class="shop-item" onclick="${canBuy ? `Shop.buyItem('${item.id}')` : ''}">
+                    <img class="shop-item-icon" src="assets/images/shop/shop_item_${item.id}.png" alt="${item.name}" data-sprite="shop_item_${item.id}">
+                    <span class="shop-item-name">${item.name}</span>
                     <div class="shop-item-price-row">
-                        <div class="shop-item-price">
-                            <span>🪙</span>
-                            <span>${item.price}</span>
-                        </div>
-                        <button class="shop-item-buy-btn" ${!canBuy ? 'disabled' : ''}>
-                            ${isOwned ? '已拥有' : '购买'}
-                        </button>
+                        <img class="shop-item-price-icon" src="assets/images/ui/shop_gold_icon.png" alt="gold">
+                        <span class="shop-item-price">${item.price}马币</span>
                     </div>
+                    <button class="shop-item-buy-btn" ${!canBuy ? 'disabled' : ''} onclick="${canBuy ? `Shop.buyItem('${item.id}')` : ''}">
+                        <img src="assets/images/ui/shop_btn_buy.png" alt="${isOwned ? '已拥有' : '购买'}">
+                    </button>
                 </div>
             `;
         }).join('');
@@ -719,6 +672,21 @@ const Shop = {
         Game.updateUI();
         this.renderItems(this.currentType);
         Game.showNotification(`购买成功!`, 'success');
+    },
+    
+    buyRecommend() {
+        this.buyItem(this.recommendItemId);
+    },
+    
+    init() {
+        const recommendItem = SHOP_ITEMS.find(i => i.id === this.recommendItemId);
+        if (recommendItem) {
+            const nameEl = document.getElementById('recommend-name');
+            const priceEl = document.getElementById('recommend-price');
+            if (nameEl) nameEl.textContent = recommendItem.name;
+            if (priceEl) priceEl.textContent = recommendItem.price;
+        }
+        this.filterType('head');
     }
 };
 

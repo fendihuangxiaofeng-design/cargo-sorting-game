@@ -282,32 +282,67 @@
 
         <!-- 商店界面 -->
         <div id="shop-screen" class="screen landscape hidden">
-            <div class="screen-bg shop-bg">
-                <div class="shop-shelf-bg"></div>
-            </div>
+            <div class="screen-bg" data-sprite="shop_bg"></div>
             
-            <div class="screen-header">
-                <button class="btn-back" onclick="Game.switchScreen('main')">←</button>
-                <h2 class="screen-title">商店</h2>
-                <div class="gold-display small">
-                    <span class="gold-icon">🪙</span>
-                    <span id="shop-gold">6000</span>
+            <div class="shop-header">
+                <div class="shop-title">
+                    <img data-sprite="shop_title_text" src="assets/images/ui/shop_title_text.png" alt="商店">
+                </div>
+                
+                <div class="shop-gold">
+                    <img data-sprite="shop_gold_icon" src="assets/images/ui/shop_gold_icon.png" alt="gold">
+                    <span class="shop-gold-label" data-sprite="shop_gold_label">马币:</span>
+                    <span class="shop-gold-value" id="shop-gold">6000</span>
                 </div>
             </div>
             
-            <div class="shop-banner">
-                <span class="banner-text">✨ 限时折扣进行中 ✨</span>
-            </div>
-            
             <div class="shop-tabs">
-                <button class="shop-tab-btn active" data-type="head" onclick="Shop.filterType('head')">🐴 马头</button>
-                <button class="shop-tab-btn" data-type="body" onclick="Shop.filterType('body')">🦴 马身</button>
-                <button class="shop-tab-btn" data-type="legs" onclick="Shop.filterType('legs')">🦵 马腿</button>
-                <button class="shop-tab-btn" data-type="tail" onclick="Shop.filterType('tail')">🎿 马尾</button>
-                <button class="shop-tab-btn" data-type="special" onclick="Shop.filterType('special')">👑 头饰</button>
+                <button class="shop-tab active" data-type="head" onclick="Shop.filterType('head')">
+                    <img data-sprite="shop_tab_head" src="assets/images/ui/shop_tab_head.png" alt="头部">
+                </button>
+                <button class="shop-tab" data-type="body" onclick="Shop.filterType('body')">
+                    <img data-sprite="shop_tab_body" src="assets/images/ui/shop_tab_body.png" alt="身体">
+                </button>
+                <button class="shop-tab" data-type="legs" onclick="Shop.filterType('legs')">
+                    <img data-sprite="shop_tab_legs" src="assets/images/ui/shop_tab_legs.png" alt="腿部">
+                </button>
+                <button class="shop-tab" data-type="tail" onclick="Shop.filterType('tail')">
+                    <img data-sprite="shop_tab_tail" src="assets/images/ui/shop_tab_tail.png" alt="尾部">
+                </button>
+                <button class="shop-tab" data-type="special" onclick="Shop.filterType('special')">
+                    <img data-sprite="shop_tab_special" src="assets/images/ui/shop_tab_special.png" alt="特殊">
+                </button>
             </div>
             
-            <div class="shop-items" id="shop-items">
+            <div class="shop-content">
+                <div class="shop-recommend">
+                    <div class="recommend-header">
+                        <img data-sprite="shop_recommend_title" src="assets/images/ui/shop_recommend_title.png" alt="特价推荐">
+                    </div>
+                    <div class="recommend-item">
+                        <img class="recommend-icon" data-sprite="shop_recommend_icon" src="assets/images/shop/shop_recommend_icon.png" alt="推荐商品">
+                        <div class="recommend-info">
+                            <span class="recommend-name" id="recommend-name">炫彩战马头盔</span>
+                            <div class="recommend-price">
+                                <img data-sprite="shop_gold_icon" src="assets/images/ui/shop_gold_icon.png" alt="gold">
+                                <span class="recommend-price-value" id="recommend-price">150</span>
+                                <span class="recommend-price-label">马币</span>
+                            </div>
+                        </div>
+                        <button class="recommend-btn" onclick="Shop.buyRecommend()">
+                            <img data-sprite="shop_btn_buy" src="assets/images/ui/shop_btn_buy.png" alt="购买">
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="shop-items-grid" id="shop-items">
+                </div>
+            </div>
+            
+            <div class="shop-actions">
+                <button class="shop-btn-back" onclick="Game.switchScreen('barn')">
+                    <img data-sprite="shop_btn_back" src="assets/images/ui/shop_btn_back.png" alt="返回">
+                </button>
             </div>
         </div>
 
