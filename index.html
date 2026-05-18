@@ -1,24 +1,306 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Trae Project</title>
-    <script type="module">
-      if (import.meta.hot?.on) {
-        import.meta.hot.on('vite:error', (error) => {
-          if (error.err) {
-            console.error(
-              [error.err.message, error.err.frame].filter(Boolean).join('\n'),
-            )
-          }
-        })
-      }
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>汽水音乐 - Three.js 3D 粒子交互</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+        body { background-color: #02050A; color: #ffffff; overflow: hidden; }
+
+        #webgl-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 0;
+        }
+
+        .vignette {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: radial-gradient(circle, rgba(0,0,0,0) 40%, rgba(2,5,10,1) 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .app-container {
+            position: relative;
+            z-index: 10;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px 60px 40px 60px;
+            pointer-events: none;
+        }
+
+        .app-container > * { pointer-events: auto; }
+
+        header { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; }
+        .logo { font-size: 22px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .logo span { background: #fff; color: #000; font-size: 14px; padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+        .nav-right { display: flex; align-items: center; gap: 30px; font-size: 15px; color: rgba(255, 255, 255, 0.8); }
+        .nav-right a { color: inherit; text-decoration: none; transition: color 0.3s; }
+        .nav-right a:hover { color: #fff; }
+        .nav-icons { display: flex; align-items: center; gap: 20px; }
+        .avatar { width: 32px; height: 32px; border-radius: 50%; background-image: url('https://api.dicebear.com/7.x/avataaars/svg?seed=Felix'); background-size: cover; border: 2px solid rgba(255,255,255,0.2);}
+
+        main { flex: 1; display: flex; flex-direction: column; justify-content: center; padding-bottom: 50px; }
+        .hero-title { font-size: 72px; font-weight: 800; line-height: 1.2; letter-spacing: 2px; margin-bottom: 40px; text-shadow: 0 5px 20px rgba(0,0,0,0.8); }
+        .login-btn { background: #ffffff; color: #000000; font-size: 20px; font-weight: bold; padding: 15px 60px; border-radius: 40px; border: none; cursor: pointer; width: fit-content; margin-bottom: 30px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .login-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 8px 25px rgba(255, 255, 255, 0.3); }
+        .platforms { font-size: 14px; color: rgba(255, 255, 255, 0.6); }
+        .platforms-icons { display: flex; gap: 15px; margin-top: 10px; font-size: 18px; color: #fff; }
+
+        .cards-wrapper { display: flex; gap: 30px; width: 100%; max-width: 1000px; }
+        .glass-card { flex: 1; background: linear-gradient(135deg, rgba(16, 50, 25, 0.3) 0%, rgba(8, 25, 12, 0.4) 100%); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 35px 40px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); transition: transform 0.3s ease, border-color 0.3s; }
+        .glass-card:hover { transform: translateY(-5px); border-color: rgba(0, 255, 65, 0.5); }
+        .card-title { font-size: 24px; font-weight: bold; margin-bottom: 8px; }
+        .card-subtitle { font-size: 13px; color: rgba(255, 255, 255, 0.7); margin-bottom: 25px; }
+        .card-list { list-style: none; }
+        .card-list li { display: flex; align-items: center; font-size: 14px; color: rgba(255, 255, 255, 0.9); margin-bottom: 15px; }
+        .card-list li::before { content: '✓'; display: inline-flex; justify-content: center; align-items: center; width: 18px; height: 18px; background: rgba(255, 255, 255, 0.8); color: #08200f; border-radius: 50%; font-size: 12px; font-weight: bold; margin-right: 12px; }
+        
+        #error-msg { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(255,0,0,0.8); padding: 20px; border-radius: 10px; z-index: 999; text-align: center; }
+
+        @media (max-width: 768px) {
+            .app-container { padding: 20px 20px 40px 20px; }
+            .hero-title { font-size: 42px; }
+            .cards-wrapper { flex-direction: column; }
+            .nav-right { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="webgl-container"></div>
+    <div class="vignette"></div>
+    
+    <div id="error-msg">WebGL 不可用或图片加载失败！<br>请在支持的浏览器中打开并确保有背景图片。</div>
+
+    <div class="app-container">
+        <header>
+            <div class="logo">♪ 汽水音乐 <span>合作平台</span></div>
+            <div class="nav-right">
+                <a href="#">创作实验室</a><a href="#">汽水音乐</a>
+                <div class="nav-icons">
+                    <span style="font-size: 20px; cursor: pointer;">🎧</span>
+                    <div style="position:relative; cursor:pointer;">🔔<span style="position:absolute; top:-5px; right:-8px; background:red; color:white; font-size:10px; padding:2px 4px; border-radius:10px;">99+</span></div>
+                    <div class="avatar"></div>
+                </div>
+            </div>
+        </header>
+        <main>
+            <h1 class="hero-title">亿万观众期待着<br>看见你的音乐</h1>
+            <button class="login-btn">登录/注册</button>
+            <div class="platforms">
+                <p>作品一站发行全球平台</p>
+                <div class="platforms-icons">♪ 🎵 📱 🌍 🎶 🎧 💿</div>
+            </div>
+        </main>
+        <footer class="cards-wrapper">
+            <div class="glass-card">
+                <div class="card-title">歌曲合作</div>
+                <div class="card-subtitle">合作全面升级，授权解锁更高分成比例</div>
+                <ul class="card-list">
+                    <li>授权歌曲得抖音应用及全网高分成比例</li>
+                    <li>优质歌曲带动用户付费额外获得更高收益</li>
+                    <li>授权全网代理可解锁更高分成比例</li>
+                </ul>
+            </div>
+            <div class="glass-card">
+                <div class="card-title">歌曲宣推</div>
+                <div class="card-subtitle">平台加码流量助力音乐</div>
+                <ul class="card-list">
+                    <li>精准触达，为新歌出圈提供长效流量引擎</li>
+                    <li>高效转化，为推歌提供无缝转化流程</li>
+                    <li>全面覆盖，为推广提供全周期全人群服务</li>
+                </ul>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        const container = document.getElementById('webgl-container');
+        
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 3000);
+        camera.position.set(0, -500, 350); 
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        const IMAGE_URL = './input_file_1.jpeg';
+        
+        const img = new Image();
+        img.src = IMAGE_URL;
+        img.crossOrigin = "Anonymous";
+
+        let particleSystem;
+        let uniforms;
+
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const particleResX = 280; 
+            const particleResY = Math.floor(particleResX * (img.height / img.width));
+            canvas.width = particleResX;
+            canvas.height = particleResY;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, particleResX, particleResY);
+            
+            const imgData = ctx.getImageData(0, 0, particleResX, particleResY).data;
+
+            const positions = [];
+            const colors = [];
+            const baseZs = [];
+
+            const spacing = 3.5; 
+            const offsetX = (particleResX * spacing) / 2;
+            const offsetY = (particleResY * spacing) / 2;
+
+            for(let y = 0; y < particleResY; y++) {
+                for(let x = 0; x < particleResX; x++) {
+                    const idx = (y * particleResX + x) * 4;
+                    const r = imgData[idx] / 255;
+                    const g = imgData[idx + 1] / 255;
+                    const b = imgData[idx + 2] / 255;
+
+                    const brightness = (r + g + b) / 3;
+                    if(brightness > 0.05) {
+                        const pX = x * spacing - offsetX;
+                        const pY = -(y * spacing - offsetY);
+                        const pZ = brightness * 80; 
+
+                        positions.push(pX, pY, 0);
+                        colors.push(r, g, b);
+                        baseZs.push(pZ); 
+                    }
+                }
+            }
+
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+            geometry.setAttribute('baseZ', new THREE.Float32BufferAttribute(baseZs, 1));
+
+            uniforms = {
+                uTime: { value: 0 },
+                uMouse: { value: new THREE.Vector2(-9999, -9999) },
+                uHoverRadius: { value: 120.0 },
+                uHoverLift: { value: 100.0 }
+            };
+
+            const material = new THREE.ShaderMaterial({
+                uniforms: uniforms,
+                vertexShader: `
+                    uniform float uTime;
+                    uniform vec2 uMouse;
+                    uniform float uHoverRadius;
+                    uniform float uHoverLift;
+
+                    attribute vec3 color;
+                    attribute float baseZ;
+
+                    varying vec3 vColor;
+
+                    void main() {
+                        vColor = color;
+                        vec3 pos = position;
+
+                        pos.z += baseZ;
+
+                        float distCenter = length(pos.xy);
+                        pos.z += sin(pos.x * 0.02 + uTime) * cos(pos.y * 0.02 + uTime) * 10.0;
+
+                        float distMouse = distance(pos.xy, uMouse);
+                        if(distMouse < uHoverRadius) {
+                            float influence = 1.0 - (distMouse / uHoverRadius);
+                            influence = smoothstep(0.0, 1.0, influence);
+                            pos.z += influence * uHoverLift;
+                            vColor = mix(vColor, vec3(1.0, 1.0, 1.0), influence * 0.4);
+                        }
+
+                        vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+                        gl_PointSize = 4.0 * (600.0 / -mvPosition.z);
+                        gl_Position = projectionMatrix * mvPosition;
+                    }
+                `,
+                fragmentShader: `
+                    varying vec3 vColor;
+                    void main() {
+                        float dist = distance(gl_PointCoord, vec2(0.5));
+                        if(dist > 0.5) discard;
+                        
+                        float alpha = 1.0 - (dist * 2.0);
+                        gl_FragColor = vec4(vColor, alpha);
+                    }
+                `,
+                transparent: true,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending
+            });
+
+            particleSystem = new THREE.Points(geometry, material);
+            particleSystem.rotation.x = Math.PI / 12;
+            scene.add(particleSystem);
+        };
+
+        img.onerror = () => {
+            document.getElementById('error-msg').style.display = 'block';
+            document.getElementById('error-msg').innerHTML = 'WebGL 不可用或图片加载失败！<br>请确保在本地服务器上运行并提供 input_file_1.jpeg 图片。';
+        };
+
+        const mouse = new THREE.Vector2();
+        const raycaster = new THREE.Raycaster();
+        const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+        const planeIntersect = new THREE.Vector3();
+
+        let mouseX = 0, mouseY = 0;
+        let targetX = 0, targetY = 0;
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+            mouseX = (e.clientX - window.innerWidth / 2) * 0.2;
+            mouseY = (e.clientY - window.innerHeight / 2) * 0.2;
+
+            if(uniforms) {
+                raycaster.setFromCamera(mouse, camera);
+                raycaster.ray.intersectPlane(plane, planeIntersect);
+                uniforms.uMouse.value.set(planeIntersect.x, planeIntersect.y);
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            targetX = mouseX;
+            targetY = mouseY;
+            camera.position.x += (targetX - camera.position.x) * 0.05;
+            camera.position.z = 350 + (targetY * -0.5); 
+            camera.lookAt(0, 0, 0);
+
+            if (uniforms) {
+                uniforms.uTime.value = clock.getElapsedTime();
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
     </script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+</body>
 </html>
