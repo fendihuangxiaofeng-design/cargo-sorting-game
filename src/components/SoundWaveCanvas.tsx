@@ -159,7 +159,10 @@ export default function SoundWaveCanvas({ className = '' }: SoundWaveCanvasProps
         );
         
         const brightnessBoost = mouseInfluence * 0.4;
-        gradient.addColorStop(0, particle.color.replace(/[\d.]+\)$/, `${Math.min(1, parseFloat(particle.color.match(/[\d.]+(?=\)$/)) || 0.5) + brightnessBoost})`));
+        const alphaMatch = particle.color.match(/[\d.]+(?=\))/);
+        const currentAlpha = alphaMatch ? parseFloat(alphaMatch[0]) : 0.5;
+        const newAlpha = Math.min(1, currentAlpha + brightnessBoost);
+        gradient.addColorStop(0, particle.color.replace(/[\d.]+\)$/, `${newAlpha})`));
         gradient.addColorStop(0.5, `rgba(40, 150, 100, ${0.2 + brightnessBoost * 0.5})`);
         gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
