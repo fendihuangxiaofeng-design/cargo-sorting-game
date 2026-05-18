@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>汽水音乐 - Three.js 3D 粒子交互</title>
+    <title>汽水音乐 - 声波粒子交互</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
         body { background-color: #02050A; color: #ffffff; overflow: hidden; }
 
-        #webgl-container {
+        #canvas-container {
             position: fixed;
             top: 0; left: 0;
             width: 100vw; height: 100vh;
@@ -37,8 +37,9 @@
         .app-container > * { pointer-events: auto; }
 
         header { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; }
-        .logo { font-size: 22px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
-        .logo span { background: #fff; color: #000; font-size: 14px; padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo svg { height: 32px; }
+        .logo span { background: #fff; color: #000; font-size: 12px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
         .nav-right { display: flex; align-items: center; gap: 30px; font-size: 15px; color: rgba(255, 255, 255, 0.8); }
         .nav-right a { color: inherit; text-decoration: none; transition: color 0.3s; }
         .nav-right a:hover { color: #fff; }
@@ -50,7 +51,7 @@
         .login-btn { background: #ffffff; color: #000000; font-size: 20px; font-weight: bold; padding: 15px 60px; border-radius: 40px; border: none; cursor: pointer; width: fit-content; margin-bottom: 30px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .login-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 8px 25px rgba(255, 255, 255, 0.3); }
         .platforms { font-size: 14px; color: rgba(255, 255, 255, 0.6); }
-        .platforms-icons { display: flex; gap: 15px; margin-top: 10px; font-size: 18px; color: #fff; }
+        .platforms-icons { display: flex; gap: 15px; margin-top: 10px; font-size: 24px; color: #fff; }
 
         .cards-wrapper { display: flex; gap: 30px; width: 100%; max-width: 1000px; }
         .glass-card { flex: 1; background: linear-gradient(135deg, rgba(16, 50, 25, 0.3) 0%, rgba(8, 25, 12, 0.4) 100%); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 35px 40px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); transition: transform 0.3s ease, border-color 0.3s; }
@@ -58,10 +59,8 @@
         .card-title { font-size: 24px; font-weight: bold; margin-bottom: 8px; }
         .card-subtitle { font-size: 13px; color: rgba(255, 255, 255, 0.7); margin-bottom: 25px; }
         .card-list { list-style: none; }
-        .card-list li { display: flex; align-items: center; font-size: 14px; color: rgba(255, 255, 255, 0.9); margin-bottom: 15px; }
-        .card-list li::before { content: '✓'; display: inline-flex; justify-content: center; align-items: center; width: 18px; height: 18px; background: rgba(255, 255, 255, 0.8); color: #08200f; border-radius: 50%; font-size: 12px; font-weight: bold; margin-right: 12px; }
-        
-        #error-msg { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(255,0,0,0.8); padding: 20px; border-radius: 10px; z-index: 999; text-align: center; }
+        .card-list li { display: flex; align-items: center; font-size: 14px; color: rgba(255, 255, 255, 0.9); margin-bottom: 12px; }
+        .card-list li::before { content: '✓'; display: inline-flex; justify-content: center; align-items: center; width: 16px; height: 16px; background: rgba(255, 255, 255, 0.8); color: #08200f; border-radius: 50%; font-size: 10px; font-weight: bold; margin-right: 12px; }
 
         @media (max-width: 768px) {
             .app-container { padding: 20px 20px 40px 20px; }
@@ -73,16 +72,21 @@
 </head>
 <body>
 
-    <div id="webgl-container"></div>
+    <canvas id="canvas-container"></canvas>
     <div class="vignette"></div>
-    
-    <div id="error-msg">WebGL 不可用或图片加载失败！<br>请在支持的浏览器中打开并确保有背景图片。</div>
 
     <div class="app-container">
         <header>
-            <div class="logo">♪ 汽水音乐 <span>合作平台</span></div>
+            <div class="logo">
+                <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M24 8C24 8 14 14 14 26C14 32 16.5 36 20 38.5V14H24V40C24 40 28 38 30 34C32 30 32 20 32 12H36C36 24 28 34 24 34C20 34 18 30 18 26C18 20 22 16 24 16V8Z" fill="#00FF41"/>
+                    <path d="M36 12V8C36 8 40 10 40 14V40C40 40 36 38 36 34V12Z" fill="#FFFFFF"/>
+                </svg>
+                <span>合作平台</span>
+            </div>
             <div class="nav-right">
-                <a href="#">创作实验室</a><a href="#">汽水音乐</a>
+                <a href="#">创作实验室</a>
+                <a href="#">汽水音乐</a>
                 <div class="nav-icons">
                     <span style="font-size: 20px; cursor: pointer;">🎧</span>
                     <div style="position:relative; cursor:pointer;">🔔<span style="position:absolute; top:-5px; right:-8px; background:red; color:white; font-size:10px; padding:2px 4px; border-radius:10px;">99+</span></div>
@@ -95,7 +99,12 @@
             <button class="login-btn">登录/注册</button>
             <div class="platforms">
                 <p>作品一站发行全球平台</p>
-                <div class="platforms-icons">♪ 🎵 📱 🌍 🎶 🎧 💿</div>
+                <div class="platforms-icons">
+                    <span>🎵</span>
+                    <span>🎶</span>
+                    <span>📱</span>
+                    <span>🌍</span>
+                </div>
             </div>
         </main>
         <footer class="cards-wrapper">
@@ -106,6 +115,7 @@
                     <li>授权歌曲得抖音应用及全网高分成比例</li>
                     <li>优质歌曲带动用户付费额外获得更高收益</li>
                     <li>授权全网代理可解锁更高分成比例</li>
+                    <li>合作全面升级，授权解锁更高分成比例</li>
                 </ul>
             </div>
             <div class="glass-card">
@@ -115,191 +125,149 @@
                     <li>精准触达，为新歌出圈提供长效流量引擎</li>
                     <li>高效转化，为推歌提供无缝转化流程</li>
                     <li>全面覆盖，为推广提供全周期全人群服务</li>
+                    <li>高效转化，为推歌提供无缝转化流程</li>
                 </ul>
             </div>
         </footer>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        const container = document.getElementById('webgl-container');
+        const canvas = document.getElementById('canvas-container');
+        const ctx = canvas.getContext('2d');
         
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 3000);
-        camera.position.set(0, -500, 350); 
-        camera.lookAt(0, 0, 0);
+        let particles = [];
+        let mouseX = 0, mouseY = 0;
+        let isMouseOver = false;
+        let time = 0;
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        container.appendChild(renderer.domElement);
+        const resize = () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initParticles();
+        };
 
-        const IMAGE_URL = './input_file_1.jpeg';
-        
-        const img = new Image();
-        img.src = IMAGE_URL;
-        img.crossOrigin = "Anonymous";
-
-        let particleSystem;
-        let uniforms;
-
-        img.onload = () => {
-            const canvas = document.createElement('canvas');
-            const particleResX = 280; 
-            const particleResY = Math.floor(particleResX * (img.height / img.width));
-            canvas.width = particleResX;
-            canvas.height = particleResY;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, particleResX, particleResY);
+        const initParticles = () => {
+            particles = [];
+            const cols = Math.floor(canvas.width / 4);
+            const rows = Math.floor(canvas.height / 4);
             
-            const imgData = ctx.getImageData(0, 0, particleResX, particleResY).data;
-
-            const positions = [];
-            const colors = [];
-            const baseZs = [];
-
-            const spacing = 3.5; 
-            const offsetX = (particleResX * spacing) / 2;
-            const offsetY = (particleResY * spacing) / 2;
-
-            for(let y = 0; y < particleResY; y++) {
-                for(let x = 0; x < particleResX; x++) {
-                    const idx = (y * particleResX + x) * 4;
-                    const r = imgData[idx] / 255;
-                    const g = imgData[idx + 1] / 255;
-                    const b = imgData[idx + 2] / 255;
-
-                    const brightness = (r + g + b) / 3;
-                    if(brightness > 0.05) {
-                        const pX = x * spacing - offsetX;
-                        const pY = -(y * spacing - offsetY);
-                        const pZ = brightness * 80; 
-
-                        positions.push(pX, pY, 0);
-                        colors.push(r, g, b);
-                        baseZs.push(pZ); 
+            for(let y = 0; y < rows; y++) {
+                for(let x = 0; x < cols; x++) {
+                    const px = (x + 0.5) * (canvas.width / cols);
+                    const py = (y + 0.5) * (canvas.height / rows);
+                    
+                    const centerX = canvas.width / 2;
+                    const centerY = canvas.height / 2;
+                    const dx = px - centerX;
+                    const dy = py - centerY;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    const baseRadius = Math.min(canvas.width, canvas.height) * 0.35;
+                    const ripple1 = Math.sin(dist * 0.02) * 20;
+                    const ripple2 = Math.sin(dist * 0.035) * 10;
+                    const ripple3 = Math.sin(dist * 0.05) * 5;
+                    const wave = ripple1 + ripple2 + ripple3;
+                    
+                    const effectiveDist = dist + wave * 0.3;
+                    const brightness = effectiveDist < baseRadius 
+                        ? 0.3 + (1 - effectiveDist / baseRadius) * 0.7 
+                        : Math.max(0.05, 0.4 - (effectiveDist - baseRadius) * 0.003);
+                    
+                    if(brightness > 0.08) {
+                        particles.push({
+                            x: px,
+                            y: py,
+                            baseBrightness: brightness,
+                            size: 1 + brightness * 2,
+                            phase: Math.random() * Math.PI * 2
+                        });
                     }
                 }
             }
-
-            const geometry = new THREE.BufferGeometry();
-            geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-            geometry.setAttribute('baseZ', new THREE.Float32BufferAttribute(baseZs, 1));
-
-            uniforms = {
-                uTime: { value: 0 },
-                uMouse: { value: new THREE.Vector2(-9999, -9999) },
-                uHoverRadius: { value: 120.0 },
-                uHoverLift: { value: 100.0 }
-            };
-
-            const material = new THREE.ShaderMaterial({
-                uniforms: uniforms,
-                vertexShader: `
-                    uniform float uTime;
-                    uniform vec2 uMouse;
-                    uniform float uHoverRadius;
-                    uniform float uHoverLift;
-
-                    attribute vec3 color;
-                    attribute float baseZ;
-
-                    varying vec3 vColor;
-
-                    void main() {
-                        vColor = color;
-                        vec3 pos = position;
-
-                        pos.z += baseZ;
-
-                        float distCenter = length(pos.xy);
-                        pos.z += sin(pos.x * 0.02 + uTime) * cos(pos.y * 0.02 + uTime) * 10.0;
-
-                        float distMouse = distance(pos.xy, uMouse);
-                        if(distMouse < uHoverRadius) {
-                            float influence = 1.0 - (distMouse / uHoverRadius);
-                            influence = smoothstep(0.0, 1.0, influence);
-                            pos.z += influence * uHoverLift;
-                            vColor = mix(vColor, vec3(1.0, 1.0, 1.0), influence * 0.4);
-                        }
-
-                        vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-                        gl_PointSize = 4.0 * (600.0 / -mvPosition.z);
-                        gl_Position = projectionMatrix * mvPosition;
-                    }
-                `,
-                fragmentShader: `
-                    varying vec3 vColor;
-                    void main() {
-                        float dist = distance(gl_PointCoord, vec2(0.5));
-                        if(dist > 0.5) discard;
-                        
-                        float alpha = 1.0 - (dist * 2.0);
-                        gl_FragColor = vec4(vColor, alpha);
-                    }
-                `,
-                transparent: true,
-                depthWrite: false,
-                blending: THREE.AdditiveBlending
-            });
-
-            particleSystem = new THREE.Points(geometry, material);
-            particleSystem.rotation.x = Math.PI / 12;
-            scene.add(particleSystem);
         };
 
-        img.onerror = () => {
-            document.getElementById('error-msg').style.display = 'block';
-            document.getElementById('error-msg').innerHTML = 'WebGL 不可用或图片加载失败！<br>请确保在本地服务器上运行并提供 input_file_1.jpeg 图片。';
-        };
-
-        const mouse = new THREE.Vector2();
-        const raycaster = new THREE.Raycaster();
-        const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
-        const planeIntersect = new THREE.Vector3();
-
-        let mouseX = 0, mouseY = 0;
-        let targetX = 0, targetY = 0;
-
-        window.addEventListener('mousemove', (e) => {
-            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-
-            mouseX = (e.clientX - window.innerWidth / 2) * 0.2;
-            mouseY = (e.clientY - window.innerHeight / 2) * 0.2;
-
-            if(uniforms) {
-                raycaster.setFromCamera(mouse, camera);
-                raycaster.ray.intersectPlane(plane, planeIntersect);
-                uniforms.uMouse.value.set(planeIntersect.x, planeIntersect.y);
+        const drawParticle = (p, time) => {
+            const dx = p.x - mouseX;
+            const dy = p.y - mouseY;
+            const distToMouse = Math.sqrt(dx * dx + dy * dy);
+            
+            const hoverRadius = 200;
+            let mouseInfluence = 0;
+            
+            if(isMouseOver && distToMouse < hoverRadius) {
+                mouseInfluence = 1 - (distToMouse / hoverRadius);
+                mouseInfluence = mouseInfluence * mouseInfluence;
             }
-        });
+            
+            const pulse = Math.sin(time * 2 + p.phase) * 0.3;
+            const brightness = p.baseBrightness + mouseInfluence * 0.5 + pulse * 0.2;
+            const finalBrightness = Math.min(1, brightness);
+            
+            const green = Math.floor(60 + finalBrightness * 195);
+            const blue = Math.floor(30 + finalBrightness * 80);
+            
+            const glowSize = p.size * (1 + mouseInfluence * 2);
+            const alpha = 0.4 + finalBrightness * 0.6;
+            
+            const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowSize * 3);
+            gradient.addColorStop(0, `rgba(${blue}, ${green}, 60, ${alpha})`);
+            gradient.addColorStop(0.3, `rgba(${blue * 0.6}, ${green * 0.8}, 40, ${alpha * 0.5})`);
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, glowSize * 3, 0, Math.PI * 2);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size * (1 + mouseInfluence), 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(200, 255, 150, ${alpha})`;
+            ctx.fill();
+        };
 
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        const drawRipples = () => {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            for(let i = 0; i < 8; i++) {
+                const baseRadius = 80 + i * 60;
+                const wave = Math.sin(time * 1.5 + i * 0.5) * 15;
+                const radius = baseRadius + wave;
+                const alpha = (0.15 - i * 0.015) * (0.6 + Math.sin(time * 1.5 + i * 0.5) * 0.4);
+                
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(30, 200, 100, ${alpha})`;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+        };
 
-        const clock = new THREE.Clock();
-
-        function animate() {
+        const animate = () => {
+            ctx.fillStyle = 'rgba(2, 5, 10, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            time += 0.016;
+            drawRipples();
+            
+            particles.forEach(p => drawParticle(p, time));
+            
             requestAnimationFrame(animate);
+        };
 
-            targetX = mouseX;
-            targetY = mouseY;
-            camera.position.x += (targetX - camera.position.x) * 0.05;
-            camera.position.z = 350 + (targetY * -0.5); 
-            camera.lookAt(0, 0, 0);
+        canvas.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            isMouseOver = true;
+        });
 
-            if (uniforms) {
-                uniforms.uTime.value = clock.getElapsedTime();
-            }
+        canvas.addEventListener('mouseleave', () => {
+            isMouseOver = false;
+        });
 
-            renderer.render(scene, camera);
-        }
-
+        window.addEventListener('resize', resize);
+        
+        resize();
         animate();
     </script>
 </body>
