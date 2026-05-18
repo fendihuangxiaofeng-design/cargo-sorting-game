@@ -62,6 +62,20 @@
         .card-list li { display: flex; align-items: center; font-size: 14px; color: rgba(255, 255, 255, 0.9); margin-bottom: 12px; }
         .card-list li::before { content: '✓'; display: inline-flex; justify-content: center; align-items: center; width: 16px; height: 16px; background: rgba(255, 255, 255, 0.8); color: #08200f; border-radius: 50%; font-size: 10px; font-weight: bold; margin-right: 12px; }
 
+        #error-message {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(200, 50, 50, 0.9);
+            padding: 20px 40px;
+            border-radius: 10px;
+            z-index: 100;
+            text-align: center;
+            font-size: 16px;
+        }
+
         @media (max-width: 768px) {
             .app-container { padding: 20px 20px 40px 20px; }
             .hero-title { font-size: 42px; }
@@ -74,6 +88,7 @@
 
     <canvas id="canvas-container"></canvas>
     <div class="vignette"></div>
+    <div id="error-message"></div>
 
     <div class="app-container">
         <header>
@@ -134,19 +149,28 @@
     <script>
         const canvas = document.getElementById('canvas-container');
         const ctx = canvas.getContext('2d');
+        const errorEl = document.getElementById('error-message');
         
         let particles = [];
         let mouseX = 0, mouseY = 0;
         let isMouseOver = false;
         let time = 0;
 
+        // 图片路径配置 - 在这里替换您的图片路径
+        const BACKGROUND_IMAGE_PATH = './input_file_1.jpeg';
+        
         const resize = () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            initParticles();
         };
 
-        const initParticles = () => {
+        const showError = (message) => {
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            console.error(message);
+        };
+
+        const createSoundWaveParticles = () => {
             particles = [];
             const cols = Math.floor(canvas.width / 4);
             const rows = Math.floor(canvas.height / 4);
@@ -179,7 +203,67 @@
                             y: py,
                             baseBrightness: brightness,
                             size: 1 + brightness * 2,
-                            phase: Math.random() * Math.PI * 2
+                            phase: Math.random() * Math.PI * 2,
+                            r: 30 + Math.floor(brightness * 80),
+                            g: 60 + Math.floor(brightness * 195),
+                            b: 20 + Math.floor(brightness * 60)
+                        });
+                    }
+                }
+            }
+        };
+
+        const initParticlesFromImage = (image) => {
+            particles = [];
+            
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            const maxResolution = 280;
+            const aspectRatio = image.width / image.height;
+            let tempWidth, tempHeight;
+            
+            if(aspectRatio > 1) {
+                tempWidth = maxResolution;
+                tempHeight = Math.floor(maxResolution / aspectRatio);
+            } else {
+                tempHeight = maxResolution;
+                tempWidth = Math.floor(maxResolution * aspectRatio);
+            }
+            
+            tempCanvas.width = tempWidth;
+            tempCanvas.height = tempHeight;
+            tempCtx.drawImage(image, 0, 0, tempWidth, tempHeight);
+            
+            const imageData = tempCtx.getImageData(0, 0, tempWidth, tempHeight);
+            const data = imageData.data;
+            
+            const scaleX = canvas.width / tempWidth;
+            const scaleY = canvas.height / tempHeight;
+            
+            for(let y = 0; y < tempHeight; y++) {
+                for(let x = 0; x < tempWidth; x++) {
+                    const index = (y * tempWidth + x) * 4;
+                    const r = data[index];
+                    const g = data[index + 1];
+                    const b = data[index + 2];
+                    const a = data[index + 3];
+                    
+                    const brightness = (r + g + b) / (3 * 255);
+                    
+                    if(a > 50 && brightness > 0.05) {
+                        const px = x * scaleX;
+                        const py = y * scaleY;
+                        
+                        particles.push({
+                            x: px,
+                            y: py,
+                            baseBrightness: brightness,
+                            size: 1 + brightness * 2,
+                            phase: Math.random() * Math.PI * 2,
+                            r: r,
+                            g: g,
+                            b: b
                         });
                     }
                 }
@@ -203,15 +287,16 @@
             const brightness = p.baseBrightness + mouseInfluence * 0.5 + pulse * 0.2;
             const finalBrightness = Math.min(1, brightness);
             
-            const green = Math.floor(60 + finalBrightness * 195);
-            const blue = Math.floor(30 + finalBrightness * 80);
-            
             const glowSize = p.size * (1 + mouseInfluence * 2);
             const alpha = 0.4 + finalBrightness * 0.6;
             
+            const r = Math.min(255, Math.floor(p.r * (1 + mouseInfluence * 0.5)));
+            const g = Math.min(255, Math.floor(p.g * (1 + mouseInfluence * 0.3)));
+            const b = Math.min(255, Math.floor(p.b * (1 + mouseInfluence * 0.3)));
+            
             const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowSize * 3);
-            gradient.addColorStop(0, `rgba(${blue}, ${green}, 60, ${alpha})`);
-            gradient.addColorStop(0.3, `rgba(${blue * 0.6}, ${green * 0.8}, 40, ${alpha * 0.5})`);
+            gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${alpha})`);
+            gradient.addColorStop(0.3, `rgba(${Math.floor(r * 0.6)}, ${Math.floor(g * 0.8)}, ${Math.floor(b * 0.5)}, ${alpha * 0.5})`);
             gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
             
             ctx.beginPath();
@@ -221,7 +306,7 @@
             
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.size * (1 + mouseInfluence), 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(200, 255, 150, ${alpha})`;
+            ctx.fillStyle = `rgba(${Math.min(255, r + 50)}, ${Math.min(255, g + 50)}, ${Math.min(255, b + 50)}, ${alpha})`;
             ctx.fill();
         };
 
@@ -255,6 +340,23 @@
             requestAnimationFrame(animate);
         };
 
+        const loadImage = () => {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            
+            img.onload = () => {
+                console.log('图片加载成功!');
+                initParticlesFromImage(img);
+            };
+            
+            img.onerror = () => {
+                console.log('无法加载图片，使用代码生成的声波效果');
+                createSoundWaveParticles();
+            };
+            
+            img.src = BACKGROUND_IMAGE_PATH;
+        };
+
         canvas.addEventListener('mousemove', (e) => {
             mouseX = e.clientX;
             mouseY = e.clientY;
@@ -265,9 +367,13 @@
             isMouseOver = false;
         });
 
-        window.addEventListener('resize', resize);
+        window.addEventListener('resize', () => {
+            resize();
+            loadImage();
+        });
         
         resize();
+        loadImage();
         animate();
     </script>
 </body>
