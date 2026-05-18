@@ -4,13 +4,11 @@ interface SoundWaveCanvasProps {
   className?: string;
 }
 
-interface Particle {
+interface WaveBar {
   x: number;
-  y: number;
-  originalX: number;
-  originalY: number;
-  velocity: number;
-  amplitude: number;
+  baseHeight: number;
+  currentHeight: number;
+  targetHeight: number;
   frequency: number;
   phase: number;
 }
@@ -19,7 +17,7 @@ export default function SoundWaveCanvas({ className = '' }: SoundWaveCanvasProps
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
   const mouseRef = useRef({ x: 0, y: 0, isMouseOver: false });
-  const particlesRef = useRef<Particle[]>([]);
+  const barsRef = useRef<WaveBar[]>([]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -31,30 +29,24 @@ export default function SoundWaveCanvas({ className = '' }: SoundWaveCanvasProps
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      initParticles();
+      initBars();
     };
 
-    const initParticles = () => {
-      const particles: Particle[] = [];
-      const spacing = 3;
-      const rows = Math.floor(canvas.height / spacing);
-      const cols = Math.floor(canvas.width / spacing);
-
-      for (let i = 0; i < cols; i++) {
-        for (let j = 0; j < rows; j++) {
-          particles.push({
-            x: i * spacing,
-            y: j * spacing,
-            originalX: i * spacing,
-            originalY: j * spacing,
-            velocity: 0,
-            amplitude: 0,
-            frequency: 0.02 + Math.random() * 0.02,
-            phase: Math.random() * Math.PI * 2,
-          });
-        }
+    const initBars = () => {
+      const bars: WaveBar[] = [];
+      const barCount = Math.floor(canvas.width / 3);
+      
+      for (let i = 0; i < barCount; i++) {
+        bars.push({
+          x: i * 3,
+          baseHeight: 20 + Math.random() * 30,
+          currentHeight: 20,
+          targetHeight: 20,
+          frequency: 0.05 + Math.random() * 0.03,
+          phase: Math.random() * Math.PI * 2,
+        });
       }
-      particlesRef.current = particles;
+      barsRef.current = bars;
     };
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -70,66 +62,100 @@ export default function SoundWaveCanvas({ className = '' }: SoundWaveCanvasProps
     let time = 0;
 
     const animate = () => {
-      ctx.fillStyle = 'rgba(10, 10, 15, 0.15)';
+      ctx.fillStyle = '#0a141a';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       const { x: mouseX, y: mouseY, isMouseOver } = mouseRef.current;
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
 
-      particlesRef.current.forEach((particle) => {
-        const dx = particle.originalX - mouseX;
-        const dy = particle.originalY - mouseY;
+      const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, canvas.width);
+      gradient.addColorStop(0, 'rgba(20, 40, 30, 0.3)');
+      gradient.addColorStop(1, 'rgba(5, 15, 20, 0)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      barsRef.current.forEach((bar) => {
+        const dx = bar.x - (isMouseOver ? mouseX : centerX);
+        const dy = canvas.height / 2 - (isMouseOver ? mouseY : centerY);
         const distance = Math.sqrt(dx * dx + dy * dy);
-        const maxDistance = isMouseOver ? 300 : 150;
+        
+        const maxDistance = isMouseOver ? 400 : 500;
         const influence = Math.max(0, 1 - distance / maxDistance);
 
-        const targetAmplitude = isMouseOver ? influence * 50 : influence * 20;
-        particle.amplitude += (targetAmplitude - particle.amplitude) * 0.08;
+        const baseInfluence = isMouseOver ? influence : 0.3 + influence * 0.4;
+        const wavePhase = time * bar.frequency + bar.phase;
+        const waveOffset = Math.sin(wavePhase) * 15;
+        
+        bar.targetHeight = bar.baseHeight + baseInfluence * (250 + waveOffset);
+        bar.currentHeight += (bar.targetHeight - bar.currentHeight) * 0.1;
 
-        particle.phase += particle.frequency;
-        const wave = Math.sin(particle.phase + time * 0.02) * particle.amplitude;
+        const barHeight = Math.max(5, bar.currentHeight);
+        const barWidth = 2.5;
+        
+        const gradientY = canvas.height - barHeight;
+        const barGradient = ctx.createLinearGradient(bar.x, gradientY, bar.x, canvas.height);
+        
+        const brightness = Math.min(1, 0.3 + baseInfluence * 0.7);
+        const innerGlow = `rgba(180, 255, 100, ${brightness})`;
+        const outerGlow = `rgba(50, 150, 120, ${brightness * 0.5})`;
+        const baseColor = `rgba(20, 60, 50, ${brightness * 0.8})`;
+        
+        barGradient.addColorStop(0, innerGlow);
+        barGradient.addColorStop(0.6, outerGlow);
+        barGradient.addColorStop(1, baseColor);
 
-        particle.x = particle.originalX + wave * 0.3;
-        particle.y = particle.originalY + wave;
+        ctx.fillStyle = barGradient;
+        ctx.fillRect(bar.x - barWidth / 2, canvas.height - barHeight, barWidth, barHeight);
 
-        if (particle.amplitude > 0.5) {
-          const alpha = Math.min(1, particle.amplitude / 30);
-          const hue = 220 + particle.amplitude * 1.5;
-          
-          ctx.beginPath();
-          ctx.arc(particle.x, particle.y, 1 + particle.amplitude * 0.03, 0, Math.PI * 2);
-          ctx.fillStyle = `hsla(${hue}, 80%, 60%, ${alpha})`;
-          ctx.fill();
-
-          if (particle.amplitude > 15) {
-            ctx.beginPath();
-            ctx.arc(particle.x, particle.y, 2 + particle.amplitude * 0.05, 0, Math.PI * 2);
-            ctx.fillStyle = `hsla(${hue + 20}, 90%, 70%, ${alpha * 0.5})`;
-            ctx.fill();
-          }
+        if (barHeight > 80) {
+          const glowSize = Math.min(20, barHeight * 0.15);
+          const glowGradient = ctx.createRadialGradient(bar.x, canvas.height - barHeight, 0, bar.x, canvas.height - barHeight, glowSize);
+          glowGradient.addColorStop(0, `rgba(180, 255, 100, ${brightness * 0.8})`);
+          glowGradient.addColorStop(0.5, `rgba(50, 200, 150, ${brightness * 0.3})`);
+          glowGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = glowGradient;
+          ctx.fillRect(bar.x - glowSize, canvas.height - barHeight - glowSize, glowSize * 2, glowSize * 2);
         }
       });
 
-      for (let i = 0; i < 5; i++) {
-        const y = canvas.height * (0.3 + i * 0.1);
+      for (let ring = 0; ring < 6; ring++) {
+        const ringRadius = 80 + ring * 70 + ((time * 2 + ring * 50) % 100);
+        const ringAlpha = Math.max(0.05, 0.3 - ring * 0.04);
+        
         ctx.beginPath();
-        ctx.moveTo(0, y);
-
-        for (let x = 0; x < canvas.width; x += 2) {
-          const dx = x - mouseX;
-          const dy = y - mouseY;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          const maxDistance = isMouseOver ? 400 : 200;
-          const influence = Math.max(0, 1 - distance / maxDistance);
-          const amplitude = isMouseOver ? influence * 60 : influence * 25;
-          
-          const waveY = y + Math.sin(x * 0.01 + time * 0.03 + i) * amplitude;
-          ctx.lineTo(x, waveY);
-        }
-
-        const hue = 240 + i * 20;
-        ctx.strokeStyle = `hsla(${hue}, 70%, 60%, 0.3)`;
+        ctx.arc(isMouseOver ? mouseX : centerX, isMouseOver ? mouseY : centerY, ringRadius, 0, Math.PI * 2);
+        
+        const ringGradient = ctx.createRadialGradient(
+          isMouseOver ? mouseX : centerX,
+          isMouseOver ? mouseY : centerY,
+          ringRadius - 5,
+          isMouseOver ? mouseX : centerX,
+          isMouseOver ? mouseY : centerY,
+          ringRadius + 5
+        );
+        ringGradient.addColorStop(0, 'transparent');
+        ringGradient.addColorStop(0.5, `rgba(80, 220, 150, ${ringAlpha})`);
+        ringGradient.addColorStop(1, 'transparent');
+        
+        ctx.strokeStyle = ringGradient;
         ctx.lineWidth = 2;
         ctx.stroke();
+      }
+
+      const particleCount = 100;
+      for (let i = 0; i < particleCount; i++) {
+        const angle = (i / particleCount) * Math.PI * 2 + time * 0.005;
+        const radius = 100 + ((time * 3 + i * 10) % 400);
+        const px = (isMouseOver ? mouseX : centerX) + Math.cos(angle) * radius;
+        const py = (isMouseOver ? mouseY : centerY) + Math.sin(angle) * radius;
+        
+        const brightness = Math.max(0.1, 0.8 - radius / 500);
+        
+        ctx.beginPath();
+        ctx.arc(px, py, 1, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(150, 255, 120, ${brightness})`;
+        ctx.fill();
       }
 
       time++;
@@ -156,7 +182,7 @@ export default function SoundWaveCanvas({ className = '' }: SoundWaveCanvasProps
     <canvas
       ref={canvasRef}
       className={`absolute inset-0 w-full h-full ${className}`}
-      style={{ background: 'linear-gradient(to bottom, #0a0a0f, #0f0f1a)' }}
+      style={{ background: '#0a141a' }}
     />
   );
 }
